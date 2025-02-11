@@ -65,6 +65,7 @@ public class OrderMatchingService {
             if (buyOrder.hasNoRemainingQuantity()) {
                 buyOrder.complete();
                 orderRepository.save(buyOrder);
+                return message.toString();
             }
         }
 
@@ -99,6 +100,7 @@ public class OrderMatchingService {
             if (sellOrder.hasNoRemainingQuantity()) {
                 sellOrder.complete();
                 orderRepository.save(sellOrder);
+                return message.toString();
             }
         }
 
