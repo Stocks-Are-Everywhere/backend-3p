@@ -56,16 +56,15 @@ public class OrderMatchingService {
             saveTradeHistory(buyOrder, sellOrder, tradeQuantity);
             message.append(logTrade(buyOrder, sellOrder, tradeQuantity));
 
-            if (sellOrder.getRemainingQuantity() == 0) {
+            if (sellOrder.hasNoRemainingQuantity()) {
                 sellOrders.poll();
                 sellOrder.complete();
             }
             orderRepository.save(sellOrder);
 
-            if (buyOrder.getRemainingQuantity() == 0) {
+            if (buyOrder.hasNoRemainingQuantity()) {
                 buyOrder.complete();
                 orderRepository.save(buyOrder);
-                return message.toString();
             }
         }
 
@@ -91,16 +90,15 @@ public class OrderMatchingService {
             saveTradeHistory(buyOrder, sellOrder, tradeQuantity);
             message.append(logTrade(buyOrder, sellOrder, tradeQuantity));
 
-            if (buyOrder.getRemainingQuantity() == 0) {
+            if (buyOrder.hasNoRemainingQuantity()) {
                 buyOrders.poll();
                 buyOrder.complete();
             }
             orderRepository.save(buyOrder);
 
-            if (sellOrder.getRemainingQuantity() == 0) {
+            if (sellOrder.hasNoRemainingQuantity()) {
                 sellOrder.complete();
                 orderRepository.save(sellOrder);
-                return message.toString();
             }
         }
 

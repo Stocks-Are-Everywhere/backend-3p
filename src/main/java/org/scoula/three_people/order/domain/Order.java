@@ -67,4 +67,8 @@ public class Order extends BaseEntity {
 	public void complete() {
 		this.status = OrderStatus.COMPLETE;
 	}
+
+	public boolean hasNoRemainingQuantity() {
+		return remainingQuantity == 0;
+	}
 }
