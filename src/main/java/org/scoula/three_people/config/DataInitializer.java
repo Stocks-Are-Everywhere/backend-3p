@@ -41,7 +41,6 @@ public class DataInitializer implements ApplicationRunner {
     private void loadDummyData() {
         System.out.println("===== 더미 데이터 추가 시작 =====");
 
-        // ✅ 저장할 때 saveAndFlush() 대신 save() 사용
         Member member1 = memberRepository.save(Member.builder()
                 .provider("GOOGLE")
                 .email("user1@example.com")

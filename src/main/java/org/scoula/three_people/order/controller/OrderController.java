@@ -6,6 +6,9 @@ import org.scoula.three_people.order.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -14,8 +17,12 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<Void> placeOrder(@RequestBody OrderRequest orderRequest) {
-        orderService.processOrder(orderRequest);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, String>> placeOrder(@RequestBody OrderRequest orderRequest) {
+        String responseMessage = orderService.processOrder(orderRequest);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", responseMessage);
+
+        return ResponseEntity.ok(response);
     }
 }
