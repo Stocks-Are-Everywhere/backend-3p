@@ -22,8 +22,8 @@ public class OrderService {
     public String processOrder(OrderRequest orderRequest) {
         OrderDTO orderDTO = OrderDTO.fromRequest(orderRequest);
 
-        Account account = accountRepository.findByMemberId(orderRequest.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("Account not found for userId: " + orderRequest.getUserId()));
+        Account account = accountRepository.findByMemberId(orderRequest.userId())
+                .orElseThrow(() -> new IllegalArgumentException("Account not found for userId: " + orderRequest.userId()));
 
         Order order = convertToEntity(orderDTO, account);
         orderRepository.save(order);
@@ -36,12 +36,12 @@ public class OrderService {
 
     private Order convertToEntity(OrderDTO dto, Account account) {
         return Order.builder()
-                .companyCode(dto.getCompanyCode())
-                .type(dto.getType())
-                .totalQuantity(dto.getTotalQuantity())
-                .remainingQuantity(dto.getRemainingQuantity())
-                .status(dto.getStatus())
-                .price(dto.getPrice())
+                .companyCode(dto.companyCode())
+                .type(dto.type())
+                .totalQuantity(dto.totalQuantity())
+                .remainingQuantity(dto.remainingQuantity())
+                .status(dto.status())
+                .price(dto.price())
                 .account(account)
                 .build();
     }

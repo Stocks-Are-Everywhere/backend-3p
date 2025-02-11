@@ -7,15 +7,13 @@ import lombok.Getter;
 
 import org.scoula.three_people.order.domain.OrderHistory;
 
-@Getter
 @Builder
-@AllArgsConstructor
-public class OrderHistoryDTO {
-
-	private Long sellOrderId;
-	private Long buyOrderId;
-	private Integer quantity;
-	private Integer price;
+public record OrderHistoryDTO(
+		Long sellOrderId,
+		Long buyOrderId,
+		Integer quantity,
+		Integer price
+) {
 
 	public OrderHistory toEntity() {
 		return OrderHistory.builder()
