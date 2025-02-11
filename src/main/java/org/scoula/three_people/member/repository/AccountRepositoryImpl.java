@@ -13,7 +13,7 @@ public class AccountRepositoryImpl {
 
 	private final AccountJpaRepository accountJpaRepository;
 
-	public Optional<Account> findById(Long id) {
-		return accountJpaRepository.findById(id);
+	public Optional<Account> findByMemberId(Long id) {
+		return accountJpaRepository.findByMemberId(id);
 	}
 }

@@ -1,6 +1,7 @@
 package org.scoula.three_people.order.service;
 
 import lombok.RequiredArgsConstructor;
+import org.scoula.three_people.member.domain.Account;
 import org.scoula.three_people.member.repository.AccountRepositoryImpl;
 import org.scoula.three_people.order.controller.request.OrderRequest;
 import org.scoula.three_people.order.domain.Order;
@@ -19,11 +20,13 @@ public class OrderService {
     @Transactional
     public void processOrder(OrderRequest orderRequest) {
         OrderDTO orderDTO = OrderDTO.fromRequest(orderRequest);
-        Order order = convertToEntity(orderDTO);
+        Account account = accountRepository.findByMemberId(orderRequest.getUserId())
+                .orElseThrow(IllegalArgumentException::new);
+        Order order = convertToEntity(orderDTO, account);
         orderRepository.save(order);
     }
 
-    private Order convertToEntity(OrderDTO dto) {
+    private Order convertToEntity(OrderDTO dto, Account account) {
         return Order.builder()
                 .companyCode(dto.getCompanyCode())
                 .type(dto.getType())
@@ -31,6 +34,7 @@ public class OrderService {
                 .remainingQuantity(dto.getRemainingQuantity())
                 .status(dto.getStatus())
                 .price(dto.getPrice())
+                .account(account)
                 .build();
     }
 }
