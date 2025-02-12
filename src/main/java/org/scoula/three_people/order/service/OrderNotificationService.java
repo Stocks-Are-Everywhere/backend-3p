@@ -7,6 +7,7 @@ import org.scoula.three_people.order.domain.OrderHistory;
 import org.scoula.three_people.order.dto.MatchingNotificationDTO;
 import org.scoula.three_people.order.repository.OrderNotificationRepository;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -26,6 +27,7 @@ public class OrderNotificationService {
 		return orderNotificationRepository.save(memberId, emitter);
 	}
 
+	@EventListener
 	public void sendNotification(final OrderHistory orderHistory) {
 		try {
 			sendNotificationToSellOrder(orderHistory);
