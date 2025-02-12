@@ -7,6 +7,7 @@ import org.scoula.three_people.order.controller.request.OrderRequest;
 import org.scoula.three_people.order.domain.Order;
 import org.scoula.three_people.order.dto.OrderDTO;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
+import org.scoula.three_people.order.service.strategy.OrderProcessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +17,7 @@ public class OrderService {
 
     private final OrderRepositoryImpl orderRepository;
     private final AccountRepositoryImpl accountRepository;
-    private final OrderMatchingService orderMatchingService;
+    private final OrderProcessor orderProcessor;
 
     @Transactional
     public String processOrder(OrderRequest orderRequest) {
@@ -28,11 +29,10 @@ public class OrderService {
         Order order = convertToEntity(orderDTO, account);
         orderRepository.save(order);
 
-        String matchingMessage = orderMatchingService.processOrder(order);
+        String matchingMessage = orderProcessor.processOrder(order);
 
         return "Order has been saved: " + order.toString() + "\n" + matchingMessage;
     }
-
 
     private Order convertToEntity(OrderDTO dto, Account account) {
         return Order.builder()

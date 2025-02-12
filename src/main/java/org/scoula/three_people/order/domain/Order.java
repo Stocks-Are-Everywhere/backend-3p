@@ -53,7 +53,7 @@ public class Order extends BaseEntity {
 	@Column(nullable = false)
 	private OrderStatus status;
 
-	@Column(nullable = false)
+	@Column
 	private Integer price;
 
 	@ManyToOne(fetch = LAZY)
@@ -78,4 +78,9 @@ public class Order extends BaseEntity {
 	public boolean hasNoRemainingQuantity() {
 		return remainingQuantity == 0;
 	}
+
+	public void setPrice(int price) {
+		this.price = price;
+	}
+
 }
