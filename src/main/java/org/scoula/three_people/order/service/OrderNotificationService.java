@@ -23,21 +23,19 @@ public class OrderNotificationService {
 
 	public SseEmitter subscribe(Long memberId) {
 		SseEmitter emitter = new SseEmitter(NOTIFICATION_TIME_OUT);
-
 		return orderNotificationRepository.save(memberId, emitter);
 	}
 
-	public void sendNotification(Long memberId, OrderHistory orderHistory) {
-		SseEmitter emitter = orderNotificationRepository.findByMemberId(memberId);
+	public void sendNotification(final OrderHistory orderHistory) {
 		try {
-			Order order = getMatchedOrder(orderHistory.getSellOrderId(), orderHistory.getBuyOrderId(), memberId);
-			emitter.send(toMatchingNotificationDto(order, orderHistory));
+			sendNotificationToSellOrder(orderHistory);
+			sendNotificationToBuyOrder(orderHistory);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private MatchingNotificationDTO toMatchingNotificationDto(Order order, OrderHistory orderHistory) {
+	private MatchingNotificationDTO toMatchingNotificationDto(final Order order, final OrderHistory orderHistory) {
 		return MatchingNotificationDTO.builder()
 			.orderId(order.getId())
 			.companyCode(order.getCompanyCode())
@@ -48,14 +46,17 @@ public class OrderNotificationService {
 			.build();
 	}
 
-	private Order getMatchedOrder(Long sellOrderId, Long buyOrderId, Long memberId) {
-		Order sellOrder = orderRepository.findById(sellOrderId)
-			.orElseThrow(IllegalArgumentException::new);
-		if (sellOrder.isSameMemberOrder(memberId)) {
-			return sellOrder;
-		}
+	private void sendNotificationToSellOrder(final OrderHistory orderHistory) throws IOException {
+		Order sellOrder = orderRepository.findById(orderHistory.getSellOrderId()).orElseThrow();
+		SseEmitter sellOrderEmitter = orderNotificationRepository.findByMemberId(
+			sellOrder.getAccount().getMember().getId());
+		sellOrderEmitter.send(toMatchingNotificationDto(sellOrder, orderHistory));
+	}
 
-		return orderRepository.findById(buyOrderId)
-			.orElseThrow(IllegalArgumentException::new);
+	private void sendNotificationToBuyOrder(final OrderHistory orderHistory) throws IOException {
+		Order buyOrder = orderRepository.findById(orderHistory.getBuyOrderId()).orElseThrow();
+		SseEmitter buyOrderEmitter = orderNotificationRepository.findByMemberId(
+			buyOrder.getAccount().getMember().getId());
+		buyOrderEmitter.send(toMatchingNotificationDto(buyOrder, orderHistory));
 	}
 }
