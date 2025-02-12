@@ -4,6 +4,7 @@ import org.scoula.three_people.member.domain.*;
 import org.scoula.three_people.member.repository.*;
 import org.scoula.three_people.order.domain.*;
 import org.scoula.three_people.order.repository.*;
+import org.scoula.three_people.order.service.MatchingQueue;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -18,16 +19,19 @@ public class DataInitializer implements ApplicationRunner {
     private final OrderJpaRepository orderRepository;
     private final OrderHistoryJpaRepository orderHistoryRepository;
     private final WishJpaRepository wishRepository;
+    private final MatchingQueue matchingQueue;
 
     public DataInitializer(MemberJpaRepository memberRepository, AccountJpaRepository accountRepository,
                            CompanyJpaRepository companyRepository, OrderJpaRepository orderRepository,
-                           OrderHistoryJpaRepository orderHistoryRepository, WishJpaRepository wishRepository) {
+                           OrderHistoryJpaRepository orderHistoryRepository, WishJpaRepository wishRepository,
+                           MatchingQueue matchingQueue) {
         this.memberRepository = memberRepository;
         this.accountRepository = accountRepository;
         this.companyRepository = companyRepository;
         this.orderRepository = orderRepository;
         this.orderHistoryRepository = orderHistoryRepository;
         this.wishRepository = wishRepository;
+        this.matchingQueue = matchingQueue;
     }
 
     @Override
@@ -107,6 +111,12 @@ public class DataInitializer implements ApplicationRunner {
                 .company(company1)
                 .context("I want to invest in this company.")
                 .build());
+
+        matchingQueue.addBuyOrder(order1);
+        System.out.println("Added to MatchingQueue (BUY): " + order1);
+
+        matchingQueue.addSellOrder(order2);
+        System.out.println("Added to MatchingQueue (SELL): " + order2);
 
         System.out.println("===== 더미 데이터 추가 완료 =====");
     }

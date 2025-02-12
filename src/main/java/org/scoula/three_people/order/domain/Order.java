@@ -53,7 +53,7 @@ public class Order extends BaseEntity {
 	@Column(nullable = false)
 	private OrderStatus status;
 
-	@Column(nullable = false)
+	@Column
 	private Integer price;
 
 	@ManyToOne(fetch = LAZY)
@@ -61,6 +61,7 @@ public class Order extends BaseEntity {
 	private Account account;
 
 	public void reduceQuantity(int quantity) {
+		validateQuantity(quantity);
 		remainingQuantity -= quantity;
 	}
 
@@ -68,8 +69,18 @@ public class Order extends BaseEntity {
 		this.status = OrderStatus.COMPLETE;
 	}
 
+	private void validateQuantity(int quantity) {
+		if (quantity > remainingQuantity) {
+			throw new IllegalArgumentException("Invalid quantity: " + quantity);
+		}
+	}
+
 	public boolean hasNoRemainingQuantity() {
 		return remainingQuantity == 0;
+	}
+
+	public void setPrice(int price) {
+		this.price = price;
 	}
 
 	public boolean isSameMemberOrder(Long memberId) {
