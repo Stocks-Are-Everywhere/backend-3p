@@ -13,6 +13,11 @@ public class OrderNotificationRepository {
 
 	public SseEmitter save(Long memberId, SseEmitter sseEmitter) {
 		elements.put(memberId, sseEmitter);
+
+		return elements.get(memberId);
+	}
+
+	public SseEmitter findByMemberId(Long memberId) {
 		return elements.get(memberId);
 	}
 }

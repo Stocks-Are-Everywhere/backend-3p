@@ -1,5 +1,7 @@
 package org.scoula.three_people.member.domain;
 
+import java.util.Objects;
+
 import org.scoula.three_people.global.entity.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -42,4 +44,7 @@ public class Member extends BaseEntity {
 	@Column(nullable = false)
 	private MemberStatus status;
 
+	public boolean isSameMember(Long memberId) {
+		return Objects.equals(this.id, memberId);
+	}
 }

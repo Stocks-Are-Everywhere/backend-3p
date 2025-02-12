@@ -71,4 +71,8 @@ public class Order extends BaseEntity {
 	public boolean hasNoRemainingQuantity() {
 		return remainingQuantity == 0;
 	}
+
+	public boolean isSameMemberOrder(Long memberId) {
+		return account.getMember().isSameMember(memberId);
+	}
 }
