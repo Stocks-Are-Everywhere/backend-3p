@@ -1,12 +1,14 @@
 package org.scoula.three_people.order.service;
 
 import lombok.RequiredArgsConstructor;
+
 import org.scoula.three_people.order.domain.Order;
 import org.scoula.three_people.order.domain.OrderHistory;
 import org.scoula.three_people.order.domain.Type;
 import org.scoula.three_people.order.dto.OrderHistoryDTO;
 import org.scoula.three_people.order.repository.OrderHistoryRepositoryImpl;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,116 +20,144 @@ import java.util.Queue;
 @Service
 public class OrderMatchingService {
 
-    private final OrderRepositoryImpl orderRepository;
-    private final OrderHistoryRepositoryImpl orderHistoryRepository;
+	private final OrderRepositoryImpl orderRepository;
+	private final OrderHistoryRepositoryImpl orderHistoryRepository;
+	private final MatchingQueue matchingQueue;
 
-    // 매수 주문 큐 (높은 가격 우선)
-    private final Queue<Order> buyOrders = new PriorityQueue<>(
-            Comparator.comparing(Order::getPrice).reversed()
-                    .thenComparing(Order::getCreatedDateTime)
-    );
+	@Transactional
+	public String processOrder(Order order) {
+		StringBuilder matchingLog = new StringBuilder();
+		logOrderReceived(order, matchingLog);
 
-    // 매도 주문 큐 (낮은 가격 우선)
-    private final Queue<Order> sellOrders = new PriorityQueue<>(
-            Comparator.comparing(Order::getPrice)
-                    .thenComparing(Order::getCreatedDateTime)
-    );
+		if (order.getType() == Type.BUY) {
+			matchBuyOrder(order, matchingLog);
+		} else {
+			matchSellOrder(order, matchingLog);
+		}
 
-    @Transactional
-    public String processOrder(Order order) {
-        return (order.getType() == Type.BUY) ? matchBuyOrder(order) : matchSellOrder(order);
-    }
+		return matchingLog.toString();
+	}
 
-    // 매수 주문을 매칭하여 체결하거나 큐에 추가
-    private String matchBuyOrder(Order buyOrder) {
-        StringBuilder message = new StringBuilder("Buy order added to queue: " + buyOrder + "\n");
+	//매수 주문을 매칭하여 체결하거나 큐에 추가
+	private void matchBuyOrder(Order buyOrder, StringBuilder matchingLog) {
+		while (matchingQueue.hasSellOrders() && buyOrder.getRemainingQuantity() > 0) {
+			Order sellOrder = matchingQueue.peekSellOrder();
 
-        while (!sellOrders.isEmpty() && buyOrder.getRemainingQuantity() > 0) {
-            Order sellOrder = sellOrders.peek();
+			if (buyOrder.getPrice() < sellOrder.getPrice()) {
+				break;
+			}
 
-            if (buyOrder.getPrice() < sellOrder.getPrice()) {
-                break;
-            }
+			executeMatch(buyOrder, sellOrder, matchingLog);
+		}
 
-            int tradeQuantity = Math.min(buyOrder.getRemainingQuantity(), sellOrder.getRemainingQuantity());
-            buyOrder.reduceQuantity(tradeQuantity);
-            sellOrder.reduceQuantity(tradeQuantity);
+		if (!buyOrder.hasNoRemainingQuantity()) {
+			matchingQueue.addBuyOrder(buyOrder);
+		}
+	}
 
-            saveTradeHistory(buyOrder, sellOrder, tradeQuantity);
-            message.append(logTrade(buyOrder, sellOrder, tradeQuantity));
+	//매도 주문을 매칭하여 체결하거나 큐에 추가
+	private void matchSellOrder(Order sellOrder, StringBuilder matchingLog) {
+		while (matchingQueue.hasBuyOrders() && !sellOrder.hasNoRemainingQuantity()) {
+			Order buyOrder = matchingQueue.peekBuyOrder();
 
-            if (sellOrder.hasNoRemainingQuantity()) {
-                sellOrders.poll();
-                sellOrder.complete();
-            }
-            orderRepository.save(sellOrder);
+			if (buyOrder.getPrice() < sellOrder.getPrice()) {
+				break;
+			}
 
-            if (buyOrder.hasNoRemainingQuantity()) {
-                buyOrder.complete();
-                orderRepository.save(buyOrder);
-                return message.toString();
-            }
-        }
+			executeMatch(buyOrder, sellOrder, matchingLog);
+		}
 
-        buyOrders.add(buyOrder);
-        return message.toString();
-    }
+		if (!sellOrder.hasNoRemainingQuantity()) {
+			matchingQueue.addSellOrder(sellOrder);
+		}
+	}
 
-    // 매도 주문을 매칭하여 체결하거나 큐에 추가
-    private String matchSellOrder(Order sellOrder) {
-        StringBuilder message = new StringBuilder("Sell order added to queue: " + sellOrder + "\n");
+	//주문 체결 후 거래 내역 저장 및 주문 상태 업데이트
+	private void executeMatch(Order buyOrder, Order sellOrder, StringBuilder matchingLog) {
+		int matchQuantity = Math.min(buyOrder.getRemainingQuantity(), sellOrder.getRemainingQuantity());
+		buyOrder.reduceQuantity(matchQuantity);
+		sellOrder.reduceQuantity(matchQuantity);
 
-        while (!buyOrders.isEmpty() && sellOrder.getRemainingQuantity() > 0) {
-            Order buyOrder = buyOrders.peek();
+		saveTradeHistory(buyOrder, sellOrder, matchQuantity);
+		logTradeExecution(buyOrder, sellOrder, matchQuantity, matchingLog);
 
-            if (buyOrder.getPrice() < sellOrder.getPrice()) {
-                break;
-            }
+		updateOrderStatus(buyOrder);
+		updateOrderStatus(sellOrder);
+	}
 
-            int tradeQuantity = Math.min(buyOrder.getRemainingQuantity(), sellOrder.getRemainingQuantity());
-            buyOrder.reduceQuantity(tradeQuantity);
-            sellOrder.reduceQuantity(tradeQuantity);
+	private void updateOrderStatus(Order order) {
+		if (order.hasNoRemainingQuantity()) {
+			order.complete();
+			orderRepository.save(order);
+		}
+	}
 
-            saveTradeHistory(buyOrder, sellOrder, tradeQuantity);
-            message.append(logTrade(buyOrder, sellOrder, tradeQuantity));
+	private void saveTradeHistory(Order buyOrder, Order sellOrder, int quantity) {
+		OrderHistory orderHistory = OrderHistoryDTO.builder()
+			.sellOrderId(sellOrder.getId())
+			.buyOrderId(buyOrder.getId())
+			.quantity(quantity)
+			.price(sellOrder.getPrice())
+			.build()
+			.toEntity();
 
-            if (buyOrder.hasNoRemainingQuantity()) {
-                buyOrders.poll();
-                buyOrder.complete();
-            }
-            orderRepository.save(buyOrder);
+		orderHistoryRepository.save(orderHistory);
+	}
 
-            if (sellOrder.hasNoRemainingQuantity()) {
-                sellOrder.complete();
-                orderRepository.save(sellOrder);
-                return message.toString();
-            }
-        }
+	private void logOrderReceived(Order order, StringBuilder log) {
+		log.append(String.format(
+			"%s order received: %s\n",
+			order.getType(),
+			order
+		));
+	}
 
-        sellOrders.add(sellOrder);
-        return message.toString();
-    }
+	private void logTradeExecution(Order buyOrder, Order sellOrder,
+		int quantity, StringBuilder log) {
+		log.append(String.format(
+			"Trade executed: %d units at %d (Buy: %d, Sell: %d)\n",
+			quantity,
+			sellOrder.getPrice(),
+			buyOrder.getId(),
+			sellOrder.getId()
+		));
+	}
+}
 
-    // 체결된 거래 내역을 저장
-    private void saveTradeHistory(Order buyOrder, Order sellOrder, int quantity) {
-        OrderHistory orderHistory = OrderHistoryDTO.builder()
-                .sellOrderId(sellOrder.getId())
-                .buyOrderId(buyOrder.getId())
-                .quantity(quantity)
-                .price(sellOrder.getPrice())
-                .build()
-                .toEntity();
+// 매도(낮은 가격 우선) / 매수(높은 가격 우선) 주문 큐
+@Component
+class MatchingQueue {
+	private final PriorityQueue<Order> buyOrders = new PriorityQueue<>(
+		Comparator.comparing(Order::getPrice).reversed()
+			.thenComparing(Order::getCreatedDateTime)
+	);
 
-        orderHistoryRepository.save(orderHistory);
-    }
+	private final PriorityQueue<Order> sellOrders = new PriorityQueue<>(
+		Comparator.comparing(Order::getPrice)
+			.thenComparing(Order::getCreatedDateTime)
+	);
 
-    // 체결된 거래 내역을 로그에 기록
-    private String logTrade(Order buyOrder, Order sellOrder, int quantity) {
-        return String.format(
-                "Trade executed: %d units at %d (BUY Account ID: %d, SELL Account ID: %d)\n",
-                quantity, sellOrder.getPrice(),
-                buyOrder.getAccount().getId(),
-                sellOrder.getAccount().getId()
-        );
-    }
+	public void addBuyOrder(Order order) {
+		buyOrders.add(order);
+	}
+
+	public void addSellOrder(Order order) {
+		sellOrders.add(order);
+	}
+
+	public Order peekBuyOrder() {
+		return buyOrders.peek();
+	}
+
+	public Order peekSellOrder() {
+		return sellOrders.peek();
+	}
+
+	public boolean hasBuyOrders() {
+		return !buyOrders.isEmpty();
+	}
+
+	public boolean hasSellOrders() {
+		return !sellOrders.isEmpty();
+	}
 }

@@ -60,14 +60,21 @@ public class Order extends BaseEntity {
 	@JoinColumn(name = "account_id", nullable = false)
 	private Account account;
 
-	public void reduceQuantity(int quantity) {
-		remainingQuantity -= quantity;
-	}
+    public void reduceQuantity(int quantity) {
+        validateQuantity(quantity);
+        remainingQuantity -= quantity;
+    }
 
 	public void complete() {
 		this.status = OrderStatus.COMPLETE;
 	}
 
+    private void validateQuantity(int quantity) {
+        if (quantity > remainingQuantity) {
+            throw new IllegalArgumentException("Invalid quantity: " + quantity);
+        }
+    }
+	
 	public boolean hasNoRemainingQuantity() {
 		return remainingQuantity == 0;
 	}
