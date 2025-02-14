@@ -39,26 +39,38 @@ public class OrderNotificationService {
 
 	private MatchingNotificationDTO toMatchingNotificationDto(final Order order, final OrderHistory orderHistory) {
 		return MatchingNotificationDTO.builder()
-			.orderId(order.getId())
-			.companyCode(order.getCompanyCode())
-			.type(order.getType())
-			.price(orderHistory.getPrice())
-			.quantity(orderHistory.getQuantity())
-			.createdAt(orderHistory.getCreatedDateTime())
-			.build();
+				.orderId(order.getId())
+				.companyCode(order.getCompanyCode())
+				.type(order.getType())
+				.price(orderHistory.getPrice())
+				.quantity(orderHistory.getQuantity())
+				.createdAt(orderHistory.getCreatedDateTime())
+				.build();
 	}
 
 	private void sendNotificationToSellOrder(final OrderHistory orderHistory) throws IOException {
 		Order sellOrder = orderRepository.findById(orderHistory.getSellOrderId()).orElseThrow();
 		SseEmitter sellOrderEmitter = orderNotificationRepository.findByMemberId(
-			sellOrder.getAccount().getMember().getId());
-		sellOrderEmitter.send(toMatchingNotificationDto(sellOrder, orderHistory));
+				sellOrder.getAccount().getMember().getId());
+
+		if (sellOrderEmitter != null) {
+			sellOrderEmitter.send(toMatchingNotificationDto(sellOrder, orderHistory));
+		} else {
+			System.err.println("SellOrderEmitter is null for memberId: "
+					+ sellOrder.getAccount().getMember().getId());
+		}
 	}
 
 	private void sendNotificationToBuyOrder(final OrderHistory orderHistory) throws IOException {
 		Order buyOrder = orderRepository.findById(orderHistory.getBuyOrderId()).orElseThrow();
 		SseEmitter buyOrderEmitter = orderNotificationRepository.findByMemberId(
-			buyOrder.getAccount().getMember().getId());
-		buyOrderEmitter.send(toMatchingNotificationDto(buyOrder, orderHistory));
+				buyOrder.getAccount().getMember().getId());
+
+		if (buyOrderEmitter != null) {
+			buyOrderEmitter.send(toMatchingNotificationDto(buyOrder, orderHistory));
+		} else {
+			System.err.println("BuyOrderEmitter is null for memberId: "
+					+ buyOrder.getAccount().getMember().getId());
+		}
 	}
 }
