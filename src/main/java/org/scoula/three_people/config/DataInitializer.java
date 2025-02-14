@@ -17,6 +17,7 @@ import org.scoula.three_people.order.domain.Type;
 import org.scoula.three_people.order.repository.OrderHistoryJpaRepository;
 import org.scoula.three_people.order.repository.OrderJpaRepository;
 import org.scoula.three_people.order.service.datastructure.OrderBook;
+import org.scoula.three_people.order.service.datastructure.PriceTreeMap;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -31,19 +32,19 @@ public class DataInitializer implements ApplicationRunner {
 	private final OrderJpaRepository orderRepository;
 	private final OrderHistoryJpaRepository orderHistoryRepository;
 	private final WishJpaRepository wishRepository;
-	private final OrderBook orderBook;
+	private final PriceTreeMap priceTreeMap;
 
 	public DataInitializer(MemberJpaRepository memberRepository, AccountJpaRepository accountRepository,
 		CompanyJpaRepository companyRepository, OrderJpaRepository orderRepository,
 		OrderHistoryJpaRepository orderHistoryRepository, WishJpaRepository wishRepository,
-		OrderBook orderBook) {
+						   PriceTreeMap priceTreeMap) {
 		this.memberRepository = memberRepository;
 		this.accountRepository = accountRepository;
 		this.companyRepository = companyRepository;
 		this.orderRepository = orderRepository;
 		this.orderHistoryRepository = orderHistoryRepository;
 		this.wishRepository = wishRepository;
-		this.orderBook = orderBook;
+		this.priceTreeMap = priceTreeMap;
 	}
 
 	@Override
@@ -124,10 +125,10 @@ public class DataInitializer implements ApplicationRunner {
 			.context("I want to invest in this company.")
 			.build());
 
-		orderBook.addBuyOrder(order1);
+		priceTreeMap.addBuyOrder(order1);
 		System.out.println("Added to MatchingQueue (BUY): " + order1);
 
-		orderBook.addSellOrder(order2);
+		priceTreeMap.addSellOrder(order2);
 		System.out.println("Added to MatchingQueue (SELL): " + order2);
 
 		System.out.println("===== 더미 데이터 추가 완료 =====");

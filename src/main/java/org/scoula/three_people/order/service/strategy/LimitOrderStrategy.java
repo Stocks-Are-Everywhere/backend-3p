@@ -3,7 +3,7 @@ package org.scoula.three_people.order.service.strategy;
 import org.scoula.three_people.order.domain.Order;
 import org.scoula.three_people.order.domain.Type;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
-import org.scoula.three_people.order.service.MatchingQueue;
+import org.scoula.three_people.order.service.datastructure.PriceTreeMap;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 class LimitOrderStrategy implements OrderStrategy {
 
 	private final OrderRepositoryImpl orderRepository;
-	private final MatchingQueue matchingQueue;
+	private final PriceTreeMap priceTreeMap;
 	private final MatchExecutor matchExecutor;
 	private final ApplicationEventPublisher publisher;
 
@@ -35,8 +35,8 @@ class LimitOrderStrategy implements OrderStrategy {
 	}
 
 	private void matchBuyOrder(Order buyOrder, StringBuilder matchingLog) {
-		while (matchingQueue.hasSellOrders() && buyOrder.getRemainingQuantity() > 0) {
-			Order sellOrder = matchingQueue.peekSellOrder();
+		while (priceTreeMap.hasSellOrders() && buyOrder.getRemainingQuantity() > 0) {
+			Order sellOrder = priceTreeMap.peekSellOrder();
 
 			if (buyOrder.getPrice() < sellOrder.getPrice()) {
 				break;
@@ -45,18 +45,18 @@ class LimitOrderStrategy implements OrderStrategy {
 			executeMatch(buyOrder, sellOrder, matchingLog);
 
 			if (sellOrder.hasNoRemainingQuantity()) {
-				matchingQueue.pollSellOrder();
+				priceTreeMap.pollSellOrder();
 			}
 		}
 
-		if (!buyOrder.hasNoRemainingQuantity() && !matchingQueue.containsBuyOrder(buyOrder)) {
-			matchingQueue.addBuyOrder(buyOrder);
+		if (!buyOrder.hasNoRemainingQuantity() && !priceTreeMap.containsBuyOrder(buyOrder)) {
+			priceTreeMap.addBuyOrder(buyOrder);
 		}
 	}
 
 	private void matchSellOrder(Order sellOrder, StringBuilder matchingLog) {
-		while (matchingQueue.hasBuyOrders() && !sellOrder.hasNoRemainingQuantity()) {
-			Order buyOrder = matchingQueue.peekBuyOrder();
+		while (priceTreeMap.hasBuyOrders() && !sellOrder.hasNoRemainingQuantity()) {
+			Order buyOrder = priceTreeMap.peekBuyOrder();
 
 			if (buyOrder.getPrice() < sellOrder.getPrice()) {
 				break;
@@ -65,12 +65,12 @@ class LimitOrderStrategy implements OrderStrategy {
 			executeMatch(buyOrder, sellOrder, matchingLog);
 
 			if (buyOrder.hasNoRemainingQuantity()) {
-				matchingQueue.pollBuyOrder();
+				priceTreeMap.pollBuyOrder();
 			}
 		}
 
-		if (!sellOrder.hasNoRemainingQuantity() && !matchingQueue.containsSellOrder(sellOrder)) {
-			matchingQueue.addSellOrder(sellOrder);
+		if (!sellOrder.hasNoRemainingQuantity() && !priceTreeMap.containsSellOrder(sellOrder)) {
+			priceTreeMap.addSellOrder(sellOrder);
 		}
 	}
 

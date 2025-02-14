@@ -20,4 +20,6 @@ public class OrderRepositoryImpl {
 	public Optional<Order> findById(Long id) {
 		return orderJpaRepository.findById(id);
 	}
+
+	public void delete(Order order) {orderJpaRepository.delete(order);}
 }

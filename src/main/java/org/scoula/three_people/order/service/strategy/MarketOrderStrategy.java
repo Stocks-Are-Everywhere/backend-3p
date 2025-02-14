@@ -3,7 +3,7 @@ package org.scoula.three_people.order.service.strategy;
 import org.scoula.three_people.order.domain.Order;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
 import org.scoula.three_people.order.repository.OrderHistoryRepositoryImpl;
-import org.scoula.three_people.order.service.MatchingQueue;
+import org.scoula.three_people.order.service.datastructure.PriceTreeMap;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,7 @@ class MarketOrderStrategy implements OrderStrategy {
 
 	private final OrderRepositoryImpl orderRepository;
 	private final OrderHistoryRepositoryImpl orderHistoryRepository;
-	private final MatchingQueue matchingQueue;
+	private final PriceTreeMap priceTreeMap;
 	private final MatchExecutor matchExecutor;
 	private final ApplicationEventPublisher publisher;
 
@@ -26,15 +26,15 @@ class MarketOrderStrategy implements OrderStrategy {
 		StringBuilder matchingLog = new StringBuilder();
 		logOrderReceived(order, matchingLog);
 
-		if (!matchingQueue.hasSellOrders()) {
+		if (!priceTreeMap.hasSellOrders()) {
 			throw new IllegalStateException("No available sell orders for market order.");
 		}
 
 		int marketPrice = determineMarketPrice();
 		order.setPrice(marketPrice);
 
-		while (matchingQueue.hasSellOrders() && order.getRemainingQuantity() > 0) {
-			Order sellOrder = matchingQueue.peekSellOrder();
+		while (priceTreeMap.hasSellOrders() && order.getRemainingQuantity() > 0) {
+			Order sellOrder = priceTreeMap.peekSellOrder();
 			if (sellOrder == null) {
 				break;
 			}
@@ -42,7 +42,7 @@ class MarketOrderStrategy implements OrderStrategy {
 			executeMatch(order, sellOrder, marketPrice, matchingLog);
 
 			if (sellOrder.hasNoRemainingQuantity()) {
-				matchingQueue.pollSellOrder();
+				priceTreeMap.pollSellOrder();
 			}
 		}
 
@@ -51,7 +51,7 @@ class MarketOrderStrategy implements OrderStrategy {
 
 
 	private int determineMarketPrice() {
-		Order bestSellOrder = matchingQueue.peekSellOrder();
+		Order bestSellOrder = priceTreeMap.peekSellOrder();
 		if (bestSellOrder == null) {
 			throw new IllegalStateException("No available sell orders to determine market price.");
 		}

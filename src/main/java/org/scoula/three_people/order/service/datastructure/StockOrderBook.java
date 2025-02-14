@@ -12,6 +12,10 @@ public class StockOrderBook implements OrderBook {
 
 	@Override
 	public void addBuyOrder(Order order) {
+		if(elements.contains(order.getCompanyCode())) {
+			elements.put(order.getCompanyCode(), new PriceTreeMap());
+		}
+
 		if (order.getType().isBuyType()) {
 			elements.get(order.getCompanyCode()).addBuyOrder(order);
 		}
@@ -19,6 +23,9 @@ public class StockOrderBook implements OrderBook {
 
 	@Override
 	public void addSellOrder(Order order) {
+		if(elements.contains(order.getCompanyCode())) {
+			elements.put(order.getCompanyCode(), new PriceTreeMap());
+		}
 		if (!order.getType().isBuyType()) {
 			elements.get(order.getCompanyCode()).addSellOrder(order);
 		}

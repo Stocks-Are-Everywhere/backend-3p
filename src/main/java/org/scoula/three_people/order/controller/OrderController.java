@@ -25,4 +25,14 @@ public class OrderController {
 
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Map<String, String>> cancelOrder(@PathVariable Long orderId) {
+        String responseMessage = orderService.deleteOrder(orderId);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", responseMessage);
+
+        return ResponseEntity.ok(response);
+    }
 }

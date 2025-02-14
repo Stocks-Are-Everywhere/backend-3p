@@ -34,6 +34,16 @@ public class OrderService {
         return "Order has been saved: " + order.toString() + "\n" + matchingMessage;
     }
 
+    @Transactional
+    public String deleteOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found for orderId: " + orderId));
+
+        orderRepository.delete(order);
+
+        return "Order has been deleted: " + order.toString();
+    }
+
     private Order convertToEntity(OrderDTO dto, Account account) {
         return Order.builder()
                 .companyCode(dto.companyCode())
