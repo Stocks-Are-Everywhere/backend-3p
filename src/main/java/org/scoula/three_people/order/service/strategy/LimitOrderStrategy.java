@@ -36,6 +36,7 @@ class LimitOrderStrategy implements OrderStrategy {
 		return matchingLog.toString();
 	}
 
+	// 지정가인 줄 알았으나 ~~ 가격 측정 방식이 시장가
 	private void matchBuyOrder(Order buyOrder, StringBuilder matchingLog) {
 		String companyCode = buyOrder.getCompanyCode();
 
@@ -124,7 +125,7 @@ class LimitOrderStrategy implements OrderStrategy {
 		String companyCode = limitOrder.getCompanyCode();
 
 		// limitOrder가 매수면 -> 시장가 매도와 매칭
-		if (limitOrder.isBuyType()) {
+		if (limitOrder.isBuyType()) { // 시장가 매수인데, 가격 측정 방식이 지정가
 			while (orderBook.hasMarketSellOrders(companyCode) && !limitOrder.hasNoRemainingQuantity()) {
 				Order marketSell = orderBook.peekMarketSellOrder(companyCode);
 				if (marketSell == null) break;
