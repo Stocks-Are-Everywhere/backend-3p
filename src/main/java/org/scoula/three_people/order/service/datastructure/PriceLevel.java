@@ -1,13 +1,13 @@
 package org.scoula.three_people.order.service.datastructure;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
 import org.scoula.three_people.order.domain.Order;
 
 public class PriceLevel {
 
-	private final Queue<Order> orders = new LinkedList<>();
+	private final PriorityQueue<Order> orders = new PriorityQueue<>(Comparator.comparing(Order::getCreatedDateTime));
 	private final Long totalQuantity = 0L;
 
 	public void addOrder(Order order) {
