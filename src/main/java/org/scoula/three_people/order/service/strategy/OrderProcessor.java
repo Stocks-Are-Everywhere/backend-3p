@@ -12,6 +12,7 @@ public class OrderProcessor {
     private final MarketOrderStrategy marketOrderStrategy;
 
     public String processOrder(Order order) {
+        // 가격이 0원이면 시장가 주문으로 판단
         if (isMarketOrder(order)) {
             return marketOrderStrategy.process(order);
         } else {
@@ -20,6 +21,6 @@ public class OrderProcessor {
     }
 
     private boolean isMarketOrder(Order order) {
-        return order.getPrice() == null;
+        return order.getPrice() == 0;
     }
 }

@@ -69,6 +69,10 @@ public class Order extends BaseEntity {
 		this.status = OrderStatus.COMPLETE;
 	}
 
+	public void cancel() {
+		this.status = OrderStatus.CANCEL;
+	}
+
 	private void validateQuantity(int quantity) {
 		if (quantity > remainingQuantity) {
 			throw new IllegalArgumentException("Invalid quantity: " + quantity);
@@ -87,6 +91,10 @@ public class Order extends BaseEntity {
 		return account.getMember().isSameMember(memberId);
 	}
 
+	public boolean isBuyType() {
+		return type == Type.BUY;
+	}
+
 	public boolean isMatchable(Order other) {
 		return isSameCompany(other.getCompanyCode())
 			&& isSamePrice(other.getPrice())
@@ -103,5 +111,9 @@ public class Order extends BaseEntity {
 
 	private boolean isDifferentType(Type type) {
 		return this.type.isDifferentType(type);
+	}
+
+	public boolean isMarketOrder() {
+		return this.price == 0;
 	}
 }

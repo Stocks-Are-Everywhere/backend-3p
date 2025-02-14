@@ -1,62 +1,33 @@
 package org.scoula.three_people.order.service.strategy;
 
 import org.scoula.three_people.order.domain.Order;
-import org.scoula.three_people.order.domain.OrderHistory;
-import org.scoula.three_people.order.dto.OrderHistoryDTO;
-import org.scoula.three_people.order.repository.OrderHistoryRepositoryImpl;
-import org.scoula.three_people.order.repository.OrderRepositoryImpl;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
+import org.scoula.three_people.order.service.datastructure.OrderBook;
+import org.springframework.stereotype.Component;
 
-import lombok.RequiredArgsConstructor;
-
-@Service
-@RequiredArgsConstructor
+@Component
 public class MatchExecutor {
 
-    private final OrderRepositoryImpl orderRepository;
-    private final OrderHistoryRepositoryImpl orderHistoryRepository;
-    private final ApplicationEventPublisher publisher;
+    public void execute(
+            Order buyOrder,
+            Order sellOrder,
+            int matchQuantity,
+            int matchedPrice,
+            StringBuilder matchingLog,
+            OrderBook orderBook
+    ) {
+        // 체결 로직
+        buyOrder.fill(matchQuantity);
+        sellOrder.fill(matchQuantity);
 
-    public void execute(Order buyer, Order seller, int matchQuantity, int matchedPrice, StringBuilder matchingLog) {
-        buyer.reduceQuantity(matchQuantity);
-        seller.reduceQuantity(matchQuantity);
+        // 체결 로그 작성
+        matchingLog.append(String.format(
+                "Matched %d units @ %d between BUY[%s] and SELL[%s]\n",
+                matchQuantity, matchedPrice, buyOrder.getId(), sellOrder.getId()
+        ));
 
-        OrderHistory orderHistory = saveTradeHistory(buyer, seller, matchQuantity, matchedPrice);
+        // 마지막 체결가 갱신
+        orderBook.setLastTradedPrice(buyOrder.getCompanyCode(), matchedPrice);
 
-        logTradeExecution(buyer, seller, matchQuantity, matchedPrice, matchingLog);
-
-        updateOrderStatus(buyer);
-        updateOrderStatus(seller);
-
-        orderRepository.save(buyer);
-        orderRepository.save(seller);
-
-        publisher.publishEvent(orderHistory);
-    }
-
-    private OrderHistory saveTradeHistory(Order buyer, Order seller, int quantity, int price) {
-        OrderHistory orderHistory = OrderHistoryDTO.builder()
-                .sellOrderId(seller.getId())
-                .buyOrderId(buyer.getId())
-                .quantity(quantity)
-                .price(price)
-                .build()
-                .toEntity();
-
-        return orderHistoryRepository.save(orderHistory);
-    }
-
-    private void logTradeExecution(Order buyer, Order seller, int quantity, int price, StringBuilder log) {
-        log.append(
-                String.format("Trade executed: %d units at %d (Buy: %d, Sell: %d)\n",
-                        quantity, price, buyer.getId(), seller.getId())
-        );
-    }
-
-    private void updateOrderStatus(Order order) {
-        if (order.hasNoRemainingQuantity()) {
-            order.complete();
-        }
+        // Repository 등에 체결 정보 저장 등...
     }
 }
