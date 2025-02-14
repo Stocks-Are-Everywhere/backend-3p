@@ -13,7 +13,7 @@ public class PriceTreeMap implements PriceMap {
 
 	@Override
 	public void addBuyOrder(Order order) {
-		if(!buyOrders.containsKey(order.getPrice())) {
+		if (!buyOrders.containsKey(order.getPrice())) {
 			buyOrders.put(order.getPrice(), new PriceLevel());
 			return;
 		}
@@ -23,8 +23,8 @@ public class PriceTreeMap implements PriceMap {
 
 	@Override
 	public void addSellOrder(Order order) {
-		if(!buyOrders.containsKey(order.getPrice())) {
-			buyOrders.put(order.getPrice(), new PriceLevel());
+		if (!sellOrders.containsKey(order.getPrice())) {
+			sellOrders.put(order.getPrice(), new PriceLevel());
 			return;
 		}
 		PriceLevel level = sellOrders.get(order.getPrice());
@@ -34,13 +34,13 @@ public class PriceTreeMap implements PriceMap {
 	@Override
 	public boolean containsBuyOrder(Order order) {
 		PriceLevel level = buyOrders.get(order.getPrice());
-		return level!=null && level.containsOrder(order);
+		return level != null && level.containsOrder(order);
 	}
 
 	@Override
 	public boolean containsSellOrder(Order order) {
 		PriceLevel level = sellOrders.get(order.getPrice());
-		return level!=null && level.containsOrder(order);
+		return level != null && level.containsOrder(order);
 	}
 
 	@Override
