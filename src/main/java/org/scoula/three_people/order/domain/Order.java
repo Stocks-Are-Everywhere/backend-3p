@@ -86,4 +86,22 @@ public class Order extends BaseEntity {
 	public boolean isSameMemberOrder(Long memberId) {
 		return account.getMember().isSameMember(memberId);
 	}
+
+	public boolean isMatchable(Order other) {
+		return isSameCompany(other.getCompanyCode())
+			&& isSamePrice(other.getPrice())
+			&& isDifferentType(other.getType());
+	}
+
+	private boolean isSameCompany(String companyCode) {
+		return this.companyCode.equals(companyCode);
+	}
+
+	private boolean isSamePrice(Integer price) {
+		return this.price.equals(price);
+	}
+
+	private boolean isDifferentType(Type type) {
+		return this.type.isDifferentType(type);
+	}
 }

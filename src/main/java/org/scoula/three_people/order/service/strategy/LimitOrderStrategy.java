@@ -6,7 +6,7 @@ import org.scoula.three_people.order.domain.Type;
 import org.scoula.three_people.order.dto.OrderHistoryDTO;
 import org.scoula.three_people.order.repository.OrderHistoryRepositoryImpl;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
-import org.scoula.three_people.order.service.MatchingQueue;
+import org.scoula.three_people.order.service.datastructure.PriceTreeMap;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 class LimitOrderStrategy implements OrderStrategy {
 	private final OrderRepositoryImpl orderRepository;
 	private final OrderHistoryRepositoryImpl orderHistoryRepository;
-	private final MatchingQueue matchingQueue;
+	private final PriceTreeMap matchingQueue;
 	private final ApplicationEventPublisher publisher;
 
 	@Transactional
