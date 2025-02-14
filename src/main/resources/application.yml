@@ -24,3 +24,14 @@ spring:
     appKey: ${KOREAINVEST_CLIENT_ID}
     appSecret: ${KOREAINVEST_CLIENT_SECRET}
     accountNo: ""
+
+  messaging:
+    rocketmq:
+      name-server: ${ROCKETMQ_NAME_SERVER}
+      producer:
+        group: ${ROCKETMQ_PRODUCER_GROUP}
+        send-message-timeout: ${ROCKETMQ_SEND_MESSAGE_TIMEOUT}
+
+  server:
+    instance:
+      id: ${SERVER_INSTANCE_ID}
