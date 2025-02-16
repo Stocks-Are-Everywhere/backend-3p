@@ -69,8 +69,8 @@ public class Order extends BaseEntity {
 		this.status = OrderStatus.COMPLETE;
 	}
 
-	public void cancel() {
-		this.status = OrderStatus.CANCEL;
+	public boolean isComplete() {
+		return this.status == OrderStatus.COMPLETE;
 	}
 
 	private void validateQuantity(int quantity) {
@@ -87,33 +87,7 @@ public class Order extends BaseEntity {
 		this.price = price;
 	}
 
-	public boolean isSameMemberOrder(Long memberId) {
-		return account.getMember().isSameMember(memberId);
-	}
-
 	public boolean isBuyType() {
 		return type == Type.BUY;
-	}
-
-	public boolean isMatchable(Order other) {
-		return isSameCompany(other.getCompanyCode())
-			&& isSamePrice(other.getPrice())
-			&& isDifferentType(other.getType());
-	}
-
-	private boolean isSameCompany(String companyCode) {
-		return this.companyCode.equals(companyCode);
-	}
-
-	private boolean isSamePrice(Integer price) {
-		return this.price.equals(price);
-	}
-
-	private boolean isDifferentType(Type type) {
-		return this.type.isDifferentType(type);
-	}
-
-	public boolean isMarketOrder() {
-		return this.price == 0;
 	}
 }

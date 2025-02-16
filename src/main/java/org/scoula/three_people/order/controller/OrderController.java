@@ -1,38 +1,42 @@
 package org.scoula.three_people.order.controller;
 
-import lombok.RequiredArgsConstructor;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.scoula.three_people.order.controller.request.OrderRequest;
+import org.scoula.three_people.order.domain.OrderHistory;
 import org.scoula.three_people.order.service.OrderService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/orders")
 public class OrderController {
 
-    private final OrderService orderService;
+	private final OrderService orderService;
 
-    @PostMapping
-    public ResponseEntity<Map<String, String>> placeOrder(@RequestBody OrderRequest orderRequest) {
-        String responseMessage = orderService.processOrder(orderRequest);
+	@PostMapping
+	public ResponseEntity<List<OrderHistory>> placeOrder(@RequestBody OrderRequest orderRequest) {
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", responseMessage);
+		return ResponseEntity.ok(orderService.processOrder(orderRequest));
+	}
 
-        return ResponseEntity.ok(response);
-    }
+	@DeleteMapping("/{orderId}")
+	public ResponseEntity<Map<String, String>> cancelOrder(@PathVariable Long orderId) {
+		String responseMessage = orderService.deleteOrder(orderId);
 
-    @DeleteMapping("/{orderId}")
-    public ResponseEntity<Map<String, String>> cancelOrder(@PathVariable Long orderId) {
-        String responseMessage = orderService.deleteOrder(orderId);
+		Map<String, String> response = new HashMap<>();
+		response.put("message", responseMessage);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", responseMessage);
-
-        return ResponseEntity.ok(response);
-    }
+		return ResponseEntity.ok(response);
+	}
 }
