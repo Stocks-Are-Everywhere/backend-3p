@@ -6,10 +6,10 @@ import org.scoula.three_people.member.domain.Account;
 import org.scoula.three_people.member.repository.AccountRepositoryImpl;
 import org.scoula.three_people.order.controller.request.OrderRequest;
 import org.scoula.three_people.order.domain.Order;
-import org.scoula.three_people.order.domain.OrderHistory;
+import org.scoula.three_people.order.domain.TradeHistory;
 import org.scoula.three_people.order.dto.OrderDTO;
-import org.scoula.three_people.order.repository.OrderHistoryRepositoryImpl;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
+import org.scoula.three_people.order.repository.TradeHistoryRepositoryImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +20,12 @@ import lombok.RequiredArgsConstructor;
 public class OrderService {
 
 	private final OrderRepositoryImpl orderRepository;
-	private final OrderHistoryRepositoryImpl orderHistoryRepository;
+	private final TradeHistoryRepositoryImpl tradeHistoryRepository;
 	private final AccountRepositoryImpl accountRepository;
 	private final OrderProcessor orderProcessor;
 
 	@Transactional
-	public List<OrderHistory> processOrder(OrderRequest orderRequest) {
+	public List<TradeHistory> processOrder(OrderRequest orderRequest) {
 		OrderDTO orderDTO = OrderDTO.fromRequest(orderRequest);
 
 		Account account = accountRepository.findByMemberId(orderRequest.userId())
@@ -33,8 +33,8 @@ public class OrderService {
 
 		Order order = convertToEntity(orderDTO, account);
 		orderRepository.save(order);
-		List<OrderHistory> histories = orderProcessor.process(order);
-		orderHistoryRepository.saveAllHistory(histories);
+		List<TradeHistory> histories = orderProcessor.process(order);
+		tradeHistoryRepository.saveAllHistory(histories);
 		return histories;
 	}
 

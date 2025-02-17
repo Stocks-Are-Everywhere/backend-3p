@@ -11,12 +11,11 @@ import org.scoula.three_people.member.repository.CompanyJpaRepository;
 import org.scoula.three_people.member.repository.MemberJpaRepository;
 import org.scoula.three_people.member.repository.WishJpaRepository;
 import org.scoula.three_people.order.domain.Order;
-import org.scoula.three_people.order.domain.OrderHistory;
 import org.scoula.three_people.order.domain.OrderStatus;
+import org.scoula.three_people.order.domain.TradeHistory;
 import org.scoula.three_people.order.domain.Type;
-import org.scoula.three_people.order.repository.OrderHistoryJpaRepository;
 import org.scoula.three_people.order.repository.OrderJpaRepository;
-import org.scoula.three_people.order.service.datastructure.OrderBook;
+import org.scoula.three_people.order.repository.TradeHistoryJpaRepository;
 import org.scoula.three_people.order.service.datastructure.PriceTreeMap;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -30,19 +29,19 @@ public class DataInitializer implements ApplicationRunner {
 	private final AccountJpaRepository accountRepository;
 	private final CompanyJpaRepository companyRepository;
 	private final OrderJpaRepository orderRepository;
-	private final OrderHistoryJpaRepository orderHistoryRepository;
+	private final TradeHistoryJpaRepository tradeHistoryJpaRepository;
 	private final WishJpaRepository wishRepository;
 	private final PriceTreeMap priceTreeMap;
 
 	public DataInitializer(MemberJpaRepository memberRepository, AccountJpaRepository accountRepository,
 		CompanyJpaRepository companyRepository, OrderJpaRepository orderRepository,
-		OrderHistoryJpaRepository orderHistoryRepository, WishJpaRepository wishRepository,
-						   PriceTreeMap priceTreeMap) {
+		TradeHistoryJpaRepository tradeHistoryJpaRepository, WishJpaRepository wishRepository,
+		PriceTreeMap priceTreeMap) {
 		this.memberRepository = memberRepository;
 		this.accountRepository = accountRepository;
 		this.companyRepository = companyRepository;
 		this.orderRepository = orderRepository;
-		this.orderHistoryRepository = orderHistoryRepository;
+		this.tradeHistoryJpaRepository = tradeHistoryJpaRepository;
 		this.wishRepository = wishRepository;
 		this.priceTreeMap = priceTreeMap;
 	}
@@ -112,7 +111,7 @@ public class DataInitializer implements ApplicationRunner {
 			.account(account2)
 			.build());
 
-		orderHistoryRepository.save(OrderHistory.builder()
+		tradeHistoryJpaRepository.save(TradeHistory.builder()
 			.sellOrderId(order2.getId())
 			.buyOrderId(order1.getId())
 			.quantity(5)
@@ -125,10 +124,10 @@ public class DataInitializer implements ApplicationRunner {
 			.context("I want to invest in this company.")
 			.build());
 
-		priceTreeMap.addBuyOrder(order1);
+		priceTreeMap.matchWithSellOrder(order1);
 		System.out.println("Added to MatchingQueue (BUY): " + order1);
 
-		priceTreeMap.addSellOrder(order2);
+		priceTreeMap.matchWithBuyOrder(order2);
 		System.out.println("Added to MatchingQueue (SELL): " + order2);
 
 		System.out.println("===== 더미 데이터 추가 완료 =====");

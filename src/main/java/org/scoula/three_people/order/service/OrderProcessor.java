@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.scoula.three_people.order.domain.Order;
-import org.scoula.three_people.order.domain.OrderHistory;
+import org.scoula.three_people.order.domain.TradeHistory;
 import org.scoula.three_people.order.service.datastructure.OrderBook;
 import org.springframework.stereotype.Component;
 
@@ -16,24 +16,21 @@ class OrderProcessor {
 
 	private final OrderBook orderBook;
 
-	public List<OrderHistory> process(final Order order) {
+	public List<TradeHistory> process(final Order order) {
 		if (order.isMarketOrder()) {
 			return processMarketOrder(order);
 		}
 		return processFixedOrder(order);
 	}
 
-	private List<OrderHistory> processMarketOrder(final Order order) {
-		List<OrderHistory> orderHistories = new ArrayList<>();
-		orderHistories.addAll(orderBook.matchWithMarketOrder(order));
-		orderHistories.addAll(orderBook.matchFixedPrice(order));
-		return orderHistories;
+	private List<TradeHistory> processMarketOrder(final Order order) {
+		return orderBook.matchMarketOrderWithLimitOrders(order);
 	}
 
-	private List<OrderHistory> processFixedOrder(final Order order) {
-		List<OrderHistory> orderHistories = new ArrayList<>();
-		orderHistories.addAll(orderBook.matchWithMarketOrder(order));
-		orderHistories.addAll(orderBook.matchFixedPrice(order));
-		return orderHistories;
+	private List<TradeHistory> processFixedOrder(final Order order) {
+		List<TradeHistory> tradeHistories = new ArrayList<>();
+		tradeHistories.addAll(orderBook.matchWithMarketOrder(order));
+		tradeHistories.addAll(orderBook.matchFixedPrice(order));
+		return tradeHistories;
 	}
 }

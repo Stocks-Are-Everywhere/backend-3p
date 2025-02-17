@@ -1,5 +1,7 @@
 package org.scoula.three_people.order.domain;
 
+import java.time.LocalDateTime;
+
 import org.scoula.three_people.global.entity.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -20,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Slf4j
-public class OrderHistory extends BaseEntity {
+public class TradeHistory extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,5 +40,8 @@ public class OrderHistory extends BaseEntity {
 
 	@Column(nullable = false)
 	private Integer price;
+
+	@Column(nullable = false)
+	private LocalDateTime tradeDateTime;
 
 }

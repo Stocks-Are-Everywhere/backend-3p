@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.scoula.three_people.order.domain.Order;
-import org.scoula.three_people.order.domain.OrderHistory;
+import org.scoula.three_people.order.domain.TradeHistory;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,7 +13,7 @@ public class StockOrderBook implements OrderBook {
 	private final ConcurrentHashMap<String, PriceTreeMap> elements = new ConcurrentHashMap<>();
 
 	@Override
-	public List<OrderHistory> matchFixedPrice(final Order order) {
+	public List<TradeHistory> matchFixedPrice(final Order order) {
 		PriceTreeMap priceTreeMap = getPriceTreeMap(order.getCompanyCode());
 		if (order.isBuyType()) {
 			return priceTreeMap.matchWithSellOrder(order);
@@ -31,7 +31,7 @@ public class StockOrderBook implements OrderBook {
 	}
 
 	@Override
-	public List<OrderHistory> matchWithMarketOrder(final Order order) {
+	public List<TradeHistory> matchWithMarketOrder(final Order order) {
 		PriceTreeMap priceTreeMap = getPriceTreeMap(order.getCompanyCode());
 		if (order.isBuyType()) {
 			return priceTreeMap.matchWithMarketSellOrder(order);
@@ -40,7 +40,7 @@ public class StockOrderBook implements OrderBook {
 	}
 
 	@Override
-	public List<OrderHistory> matchMarketOrderWithLimitOrders(Order order) {
+	public List<TradeHistory> matchMarketOrderWithLimitOrders(Order order) {
 		PriceTreeMap priceTreeMap = getPriceTreeMap(order.getCompanyCode());
 		if (order.isBuyType()) {
 			return priceTreeMap.matchMarketOrderWithSellOrders(order);

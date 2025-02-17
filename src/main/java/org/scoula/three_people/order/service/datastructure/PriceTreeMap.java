@@ -7,7 +7,7 @@ import java.util.TreeMap;
 
 import org.scoula.three_people.order.constant.OrderConstant;
 import org.scoula.three_people.order.domain.Order;
-import org.scoula.three_people.order.domain.OrderHistory;
+import org.scoula.three_people.order.domain.TradeHistory;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,9 +17,9 @@ public class PriceTreeMap {
 
 	private final TreeMap<Integer, PriceLevel> sellOrders = new TreeMap<>();
 
-	public List<OrderHistory> matchWithBuyOrder(final Order order) {
+	public List<TradeHistory> matchWithBuyOrder(final Order order) {
 		PriceLevel level = getBuyPriceLevel(order.getPrice());
-		List<OrderHistory> histories = level.match(order);
+		List<TradeHistory> histories = level.match(order);
 		addRemainingSellOrder(order);
 		return histories;
 	}
@@ -32,9 +32,9 @@ public class PriceTreeMap {
 		level.addOrder(order);
 	}
 
-	public List<OrderHistory> matchWithSellOrder(final Order order) {
+	public List<TradeHistory> matchWithSellOrder(final Order order) {
 		PriceLevel level = getSellPriceLevel(order.getPrice());
-		List<OrderHistory> histories = level.match(order);
+		List<TradeHistory> histories = level.match(order);
 		addRemainingBuyOrder(order);
 		return histories;
 	}
@@ -65,18 +65,18 @@ public class PriceTreeMap {
 		return level;
 	}
 
-	public List<OrderHistory> matchWithMarketSellOrder(final Order order) {
+	public List<TradeHistory> matchWithMarketSellOrder(final Order order) {
 		PriceLevel level = getSellPriceLevel(OrderConstant.MARKET_ORDER_PRICE.getValue());
 		return level.match(order);
 	}
 
-	public List<OrderHistory> matchWithMarketBuyOrder(final Order order) {
+	public List<TradeHistory> matchWithMarketBuyOrder(final Order order) {
 		PriceLevel level = getBuyPriceLevel(OrderConstant.MARKET_ORDER_PRICE.getValue());
 		return level.match(order);
 	}
 
-	public List<OrderHistory> matchMarketOrderWithSellOrders(final Order order) {
-		List<OrderHistory> histories = new ArrayList<>();
+	public List<TradeHistory> matchMarketOrderWithSellOrders(final Order order) {
+		List<TradeHistory> histories = new ArrayList<>();
 		sellOrders.keySet().stream()
 			.filter(key -> key != OrderConstant.MARKET_ORDER_PRICE.getValue())
 			.forEach(key -> {
@@ -88,8 +88,8 @@ public class PriceTreeMap {
 		return histories;
 	}
 
-	public List<OrderHistory> matchMarketOrderWithBuyOrders(final Order order) {
-		List<OrderHistory> histories = new ArrayList<>();
+	public List<TradeHistory> matchMarketOrderWithBuyOrders(final Order order) {
+		List<TradeHistory> histories = new ArrayList<>();
 		sellOrders.keySet().stream()
 			.filter(key -> key != OrderConstant.MARKET_ORDER_PRICE.getValue())
 			.forEach(key -> {

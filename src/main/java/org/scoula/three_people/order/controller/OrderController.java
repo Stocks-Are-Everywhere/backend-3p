@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.scoula.three_people.order.controller.request.OrderRequest;
-import org.scoula.three_people.order.domain.OrderHistory;
+import org.scoula.three_people.order.domain.TradeHistory;
 import org.scoula.three_people.order.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,7 +25,7 @@ public class OrderController {
 	private final OrderService orderService;
 
 	@PostMapping
-	public ResponseEntity<List<OrderHistory>> placeOrder(@RequestBody OrderRequest orderRequest) {
+	public ResponseEntity<List<TradeHistory>> placeOrder(@RequestBody OrderRequest orderRequest) {
 
 		return ResponseEntity.ok(orderService.processOrder(orderRequest));
 	}
