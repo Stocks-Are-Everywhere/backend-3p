@@ -10,4 +10,6 @@ public interface OrderBook {
 	List<OrderHistory> matchWithMarketOrder(Order order);
 
 	List<OrderHistory> matchFixedPrice(Order order);
+
+	List<OrderHistory> matchMarketOrderWithLimitOrders(Order order);
 }

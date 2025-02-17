@@ -20,6 +20,10 @@ public class PriceLevel {
 			history.add(processMatching(order, element));
 			if (order.hasNoRemainingQuantity()) {
 				order.complete();
+				if (element.hasNoRemainingQuantity()) {
+					element.complete();
+					break;
+				}
 				elements.offer(element);
 				break;
 			}

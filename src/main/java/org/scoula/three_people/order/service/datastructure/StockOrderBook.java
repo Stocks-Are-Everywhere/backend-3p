@@ -38,4 +38,13 @@ public class StockOrderBook implements OrderBook {
 		}
 		return priceTreeMap.matchWithMarketBuyOrder(order);
 	}
+
+	@Override
+	public List<OrderHistory> matchMarketOrderWithLimitOrders(Order order) {
+		PriceTreeMap priceTreeMap = getPriceTreeMap(order.getCompanyCode());
+		if (order.isBuyType()) {
+			return priceTreeMap.matchMarketOrderWithSellOrders(order);
+		}
+		return priceTreeMap.matchMarketOrderWithBuyOrders(order);
+	}
 }

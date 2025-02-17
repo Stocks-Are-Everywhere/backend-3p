@@ -1,5 +1,6 @@
 package org.scoula.three_people.order.service.datastructure;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
@@ -66,15 +67,37 @@ public class PriceTreeMap {
 
 	public List<OrderHistory> matchWithMarketSellOrder(final Order order) {
 		PriceLevel level = getSellPriceLevel(OrderConstant.MARKET_ORDER_PRICE.getValue());
-		List<OrderHistory> histories = level.match(order);
-		addRemainingBuyOrder(order);
-		return histories;
+		return level.match(order);
 	}
 
 	public List<OrderHistory> matchWithMarketBuyOrder(final Order order) {
 		PriceLevel level = getBuyPriceLevel(OrderConstant.MARKET_ORDER_PRICE.getValue());
-		List<OrderHistory> histories = level.match(order);
+		return level.match(order);
+	}
+
+	public List<OrderHistory> matchMarketOrderWithSellOrders(final Order order) {
+		List<OrderHistory> histories = new ArrayList<>();
+		sellOrders.keySet().stream()
+			.filter(key -> key != OrderConstant.MARKET_ORDER_PRICE.getValue())
+			.forEach(key -> {
+				PriceLevel level = getSellPriceLevel(key);
+				histories.addAll(level.match(order));
+			});
+		addRemainingBuyOrder(order);
+
+		return histories;
+	}
+
+	public List<OrderHistory> matchMarketOrderWithBuyOrders(final Order order) {
+		List<OrderHistory> histories = new ArrayList<>();
+		sellOrders.keySet().stream()
+			.filter(key -> key != OrderConstant.MARKET_ORDER_PRICE.getValue())
+			.forEach(key -> {
+				PriceLevel level = getBuyPriceLevel(key);
+				histories.addAll(level.match(order));
+			});
 		addRemainingSellOrder(order);
+
 		return histories;
 	}
 }

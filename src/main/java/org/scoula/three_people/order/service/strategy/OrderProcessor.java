@@ -15,7 +15,7 @@ public class OrderProcessor {
 	private final LimitOrderStrategy limitOrderStrategy;
 	private final MarketOrderStrategy marketOrderStrategy;
 
-	public List<OrderHistory> process(Order order) {
+	public List<OrderHistory> process(final Order order) {
 		if (order.isMarketOrder()) {
 			return marketOrderStrategy.process(order);
 		}
