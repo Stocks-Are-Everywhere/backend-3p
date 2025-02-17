@@ -17,4 +17,8 @@ public class TradeHistoryRepositoryImpl {
 	public List<TradeHistory> saveAllHistory(Collection<TradeHistory> tradeHistories) {
 		return tradeHistoryJpaRepository.saveAll(tradeHistories);
 	}
+
+	public TradeHistory save(TradeHistory tradeHistory) {
+		return tradeHistoryJpaRepository.save(tradeHistory);
+	}
 }
