@@ -1,6 +1,6 @@
 package org.scoula.three_people.order.controller;
 
-import org.scoula.three_people.order.service.OrderNotificationService;
+import org.scoula.three_people.order.service.TradeHistoryNotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,12 +13,12 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/order-matching")
-public class OrderMatchingNotificationController {
+public class TradeHistoryNotificationController {
 
-	private final OrderNotificationService orderNotificationService;
+	private final TradeHistoryNotificationService tradeHistoryNotificationService;
 
 	@GetMapping("/stream/{memberId}")
 	public ResponseEntity<SseEmitter> subscribe(@PathVariable Long memberId) {
-		return ResponseEntity.ok(orderNotificationService.subscribe(memberId));
+		return ResponseEntity.ok(tradeHistoryNotificationService.subscribe(memberId));
 	}
 }

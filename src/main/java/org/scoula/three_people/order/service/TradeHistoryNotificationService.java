@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class OrderNotificationService {
+public class TradeHistoryNotificationService {
 
 	private static final Long NOTIFICATION_TIME_OUT = 60L * 60 * 60 * 60;
 
