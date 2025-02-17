@@ -7,7 +7,9 @@ import java.util.PriorityQueue;
 
 import org.scoula.three_people.order.domain.Order;
 import org.scoula.three_people.order.domain.OrderHistory;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PriceLevel {
 
 	private final PriorityQueue<Order> elements = new PriorityQueue<>(Comparator.comparing(Order::getCreatedDateTime));

@@ -10,7 +10,6 @@ import org.scoula.three_people.order.domain.OrderHistory;
 import org.scoula.three_people.order.dto.OrderDTO;
 import org.scoula.three_people.order.repository.OrderHistoryRepositoryImpl;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
-import org.scoula.three_people.order.service.strategy.OrderProcessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
