@@ -1,5 +1,7 @@
 package org.scoula.three_people.order.domain;
 
+import java.time.LocalDateTime;
+
 import org.scoula.three_people.global.entity.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -38,5 +40,8 @@ public class TradeHistory extends BaseEntity {
 
 	@Column(nullable = false)
 	private Integer price;
+
+	@Column(nullable = false)
+	private LocalDateTime tradeDateTime;
 
 }

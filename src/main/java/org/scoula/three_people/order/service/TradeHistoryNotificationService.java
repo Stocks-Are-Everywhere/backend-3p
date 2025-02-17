@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class OrderNotificationService {
+public class TradeHistoryNotificationService {
 
 	private static final Long NOTIFICATION_TIME_OUT = 60L * 60 * 60 * 60;
 
@@ -52,13 +52,25 @@ public class OrderNotificationService {
 		Order sellOrder = orderRepository.findById(tradeHistory.getSellOrderId()).orElseThrow();
 		SseEmitter sellOrderEmitter = orderNotificationRepository.findByMemberId(
 			sellOrder.getAccount().getMember().getId());
-		sellOrderEmitter.send(toMatchingNotificationDto(sellOrder, tradeHistory));
+
+		if (sellOrderEmitter != null) {
+			sellOrderEmitter.send(toMatchingNotificationDto(sellOrder, tradeHistory));
+		} else {
+			System.err.println("SellOrderEmitter is null for memberId: "
+				+ sellOrder.getAccount().getMember().getId());
+		}
 	}
 
 	private void sendNotificationToBuyOrder(final TradeHistory tradeHistory) throws IOException {
 		Order buyOrder = orderRepository.findById(tradeHistory.getBuyOrderId()).orElseThrow();
 		SseEmitter buyOrderEmitter = orderNotificationRepository.findByMemberId(
 			buyOrder.getAccount().getMember().getId());
-		buyOrderEmitter.send(toMatchingNotificationDto(buyOrder, tradeHistory));
+
+		if (buyOrderEmitter != null) {
+			buyOrderEmitter.send(toMatchingNotificationDto(buyOrder, tradeHistory));
+		} else {
+			System.err.println("BuyOrderEmitter is null for memberId: "
+				+ buyOrder.getAccount().getMember().getId());
+		}
 	}
 }
