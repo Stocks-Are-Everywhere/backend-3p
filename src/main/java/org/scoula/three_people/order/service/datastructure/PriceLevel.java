@@ -40,14 +40,14 @@ public class PriceLevel {
 			return OrderHistory.builder()
 				.sellOrderId(matchingOrder.getId())
 				.buyOrderId(order.getId())
-				.price(matchingOrder.getPrice())
+				.price(Math.max(order.getPrice(), matchingOrder.getPrice()))
 				.quantity(quantity)
 				.build();
 		}
 		return OrderHistory.builder()
 			.sellOrderId(order.getId())
 			.buyOrderId(matchingOrder.getId())
-			.price(matchingOrder.getPrice())
+			.price(Math.max(order.getPrice(), matchingOrder.getPrice()))
 			.quantity(quantity)
 			.build();
 	}

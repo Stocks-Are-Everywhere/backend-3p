@@ -4,6 +4,7 @@ import static jakarta.persistence.FetchType.*;
 
 import org.scoula.three_people.global.entity.BaseEntity;
 import org.scoula.three_people.member.domain.Account;
+import org.scoula.three_people.order.constant.OrderConstant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -89,5 +90,9 @@ public class Order extends BaseEntity {
 
 	public boolean isBuyType() {
 		return type == Type.BUY;
+	}
+
+	public boolean isMarketOrder() {
+		return this.price == OrderConstant.MARKET_ORDER_PRICE.getValue();
 	}
 }

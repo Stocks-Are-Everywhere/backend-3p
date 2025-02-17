@@ -7,7 +7,7 @@ import org.scoula.three_people.order.domain.OrderHistory;
 
 public interface OrderBook {
 
-	boolean hasMatchingMarketOrder(Order order);
+	List<OrderHistory> matchWithMarketOrder(Order order);
 
 	List<OrderHistory> matchFixedPrice(Order order);
 }

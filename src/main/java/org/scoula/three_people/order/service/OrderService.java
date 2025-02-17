@@ -10,7 +10,7 @@ import org.scoula.three_people.order.domain.OrderHistory;
 import org.scoula.three_people.order.dto.OrderDTO;
 import org.scoula.three_people.order.repository.OrderHistoryRepositoryImpl;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
-import org.scoula.three_people.order.service.datastructure.OrderBook;
+import org.scoula.three_people.order.service.strategy.OrderProcessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +23,7 @@ public class OrderService {
 	private final OrderRepositoryImpl orderRepository;
 	private final OrderHistoryRepositoryImpl orderHistoryRepository;
 	private final AccountRepositoryImpl accountRepository;
-	private final OrderBook orderBook;
+	private final OrderProcessor orderProcessor;
 
 	@Transactional
 	public List<OrderHistory> processOrder(OrderRequest orderRequest) {
@@ -34,7 +34,9 @@ public class OrderService {
 
 		Order order = convertToEntity(orderDTO, account);
 		orderRepository.save(order);
-		return orderHistoryRepository.saveAllHistory(orderBook.matchFixedPrice(order));
+		List<OrderHistory> histories = orderProcessor.process(order);
+		orderHistoryRepository.saveAllHistory(histories);
+		return histories;
 	}
 
 	@Transactional
