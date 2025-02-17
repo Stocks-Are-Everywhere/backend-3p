@@ -1,10 +1,10 @@
 package org.scoula.three_people.order.service.strategy;
 
 import org.scoula.three_people.order.domain.Order;
-import org.scoula.three_people.order.domain.OrderHistory;
+import org.scoula.three_people.order.domain.TradeHistory;
 import org.scoula.three_people.order.domain.Type;
-import org.scoula.three_people.order.dto.OrderHistoryDTO;
-import org.scoula.three_people.order.repository.OrderHistoryRepositoryImpl;
+import org.scoula.three_people.order.dto.TradeHistoryDTO;
+import org.scoula.three_people.order.repository.TradeHistoryRepositoryImpl;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
 import org.scoula.three_people.order.service.MatchingQueue;
 import org.springframework.context.ApplicationEventPublisher;
@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 class LimitOrderStrategy implements OrderStrategy {
 	private final OrderRepositoryImpl orderRepository;
-	private final OrderHistoryRepositoryImpl orderHistoryRepository;
+	private final TradeHistoryRepositoryImpl tradeHistoryRepository;
 	private final MatchingQueue matchingQueue;
 	private final ApplicationEventPublisher publisher;
 
@@ -82,7 +82,7 @@ class LimitOrderStrategy implements OrderStrategy {
 	}
 
 	private void saveTradeHistory(Order buyOrder, Order sellOrder, int quantity) {
-		OrderHistory orderHistory = OrderHistoryDTO.builder()
+		TradeHistory tradeHistory = TradeHistoryDTO.builder()
 			.sellOrderId(sellOrder.getId())
 			.buyOrderId(buyOrder.getId())
 			.quantity(quantity)
@@ -90,8 +90,8 @@ class LimitOrderStrategy implements OrderStrategy {
 			.build()
 			.toEntity();
 
-		orderHistoryRepository.save(orderHistory);
-		publisher.publishEvent(orderHistory);
+		tradeHistoryRepository.save(tradeHistory);
+		publisher.publishEvent(tradeHistory);
 	}
 
 	private void logOrderReceived(Order order, StringBuilder log) {

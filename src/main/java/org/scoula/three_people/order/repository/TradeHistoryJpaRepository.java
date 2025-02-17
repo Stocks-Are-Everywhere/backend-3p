@@ -1,8 +1,8 @@
 package org.scoula.three_people.order.repository;
 
-import org.scoula.three_people.order.domain.OrderHistory;
+import org.scoula.three_people.order.domain.TradeHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface OrderHistoryJpaRepository extends JpaRepository<OrderHistory, Long> {
+public interface TradeHistoryJpaRepository extends JpaRepository<TradeHistory, Long> {
 
 }

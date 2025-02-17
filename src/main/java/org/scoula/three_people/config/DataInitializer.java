@@ -17,19 +17,19 @@ public class DataInitializer implements ApplicationRunner {
     private final AccountJpaRepository accountRepository;
     private final CompanyJpaRepository companyRepository;
     private final OrderJpaRepository orderRepository;
-    private final OrderHistoryJpaRepository orderHistoryRepository;
+    private final TradeHistoryJpaRepository tradeHistoryRepository;
     private final WishJpaRepository wishRepository;
     private final MatchingQueue matchingQueue;
 
     public DataInitializer(MemberJpaRepository memberRepository, AccountJpaRepository accountRepository,
                            CompanyJpaRepository companyRepository, OrderJpaRepository orderRepository,
-                           OrderHistoryJpaRepository orderHistoryRepository, WishJpaRepository wishRepository,
+                           TradeHistoryJpaRepository tradeHistoryRepository, WishJpaRepository wishRepository,
                            MatchingQueue matchingQueue) {
         this.memberRepository = memberRepository;
         this.accountRepository = accountRepository;
         this.companyRepository = companyRepository;
         this.orderRepository = orderRepository;
-        this.orderHistoryRepository = orderHistoryRepository;
+        this.tradeHistoryRepository = tradeHistoryRepository;
         this.wishRepository = wishRepository;
         this.matchingQueue = matchingQueue;
     }
@@ -99,7 +99,7 @@ public class DataInitializer implements ApplicationRunner {
                 .account(account2)
                 .build());
 
-        orderHistoryRepository.save(OrderHistory.builder()
+        tradeHistoryRepository.save(TradeHistory.builder()
                 .sellOrderId(order2.getId())
                 .buyOrderId(order1.getId())
                 .quantity(5)

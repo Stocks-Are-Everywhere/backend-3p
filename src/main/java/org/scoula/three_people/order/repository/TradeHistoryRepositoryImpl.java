@@ -1,17 +1,17 @@
 package org.scoula.three_people.order.repository;
 
-import org.scoula.three_people.order.domain.OrderHistory;
+import org.scoula.three_people.order.domain.TradeHistory;
 import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
-public class OrderHistoryRepositoryImpl {
+public class TradeHistoryRepositoryImpl {
 
-	private final OrderHistoryJpaRepository orderHistoryJpaRepository;
+	private final TradeHistoryJpaRepository tradeHistoryJpaRepository;
 
-	public OrderHistory save(OrderHistory orderHistory) {
-		return orderHistoryJpaRepository.save(orderHistory);
+	public TradeHistory save(TradeHistory tradeHistory) {
+		return tradeHistoryJpaRepository.save(tradeHistory);
 	}
 }

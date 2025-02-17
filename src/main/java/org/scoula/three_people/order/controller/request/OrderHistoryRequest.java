@@ -1,6 +1,6 @@
 package org.scoula.three_people.order.controller.request;
 
-public record OrderHistoryRequest(
+public record TradeHistoryRequest(
         String userId,
         String companyCode
 ) {
