@@ -1,5 +1,6 @@
 package org.scoula.three_people.order.service.datastructure;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -48,6 +49,7 @@ public class PriceLevel {
 				.buyOrderId(order.getId())
 				.price(Math.max(order.getPrice(), matchingOrder.getPrice()))
 				.quantity(quantity)
+				.tradeDateTime(LocalDateTime.now())
 				.build();
 		}
 		return TradeHistory.builder()
@@ -55,6 +57,7 @@ public class PriceLevel {
 			.buyOrderId(matchingOrder.getId())
 			.price(Math.max(order.getPrice(), matchingOrder.getPrice()))
 			.quantity(quantity)
+			.tradeDateTime(LocalDateTime.now())
 			.build();
 	}
 

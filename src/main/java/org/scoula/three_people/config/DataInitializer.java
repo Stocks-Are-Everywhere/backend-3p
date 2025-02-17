@@ -1,5 +1,7 @@
 package org.scoula.three_people.config;
 
+import java.time.LocalDateTime;
+
 import org.scoula.three_people.member.domain.Account;
 import org.scoula.three_people.member.domain.Company;
 import org.scoula.three_people.member.domain.Member;
@@ -116,6 +118,7 @@ public class DataInitializer implements ApplicationRunner {
 			.buyOrderId(order1.getId())
 			.quantity(5)
 			.price(10000)
+			.tradeDateTime(LocalDateTime.of(2025, 2, 14, 14, 40))
 			.build());
 
 		wishRepository.save(Wish.builder()

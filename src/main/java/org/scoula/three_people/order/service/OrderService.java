@@ -25,7 +25,7 @@ public class OrderService {
 	private final OrderProcessor orderProcessor;
 
 	@Transactional
-	public List<TradeHistory> processOrder(OrderRequest orderRequest) {
+	public void placeOrder(OrderRequest orderRequest) {
 		OrderDTO orderDTO = OrderDTO.fromRequest(orderRequest);
 
 		Account account = accountRepository.findByMemberId(orderRequest.userId())
@@ -33,9 +33,13 @@ public class OrderService {
 
 		Order order = convertToEntity(orderDTO, account);
 		orderRepository.save(order);
+
+		process(order);
+	}
+
+	private void process(Order order) {
 		List<TradeHistory> histories = orderProcessor.process(order);
 		tradeHistoryRepository.saveAllHistory(histories);
-		return histories;
 	}
 
 	@Transactional
