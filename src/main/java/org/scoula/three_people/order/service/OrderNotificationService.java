@@ -3,7 +3,7 @@ package org.scoula.three_people.order.service;
 import java.io.IOException;
 
 import org.scoula.three_people.order.domain.Order;
-import org.scoula.three_people.order.domain.OrderHistory;
+import org.scoula.three_people.order.domain.TradeHistory;
 import org.scoula.three_people.order.dto.MatchingNotificationDTO;
 import org.scoula.three_people.order.repository.OrderNotificationRepository;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
@@ -28,37 +28,37 @@ public class OrderNotificationService {
 	}
 
 	@EventListener
-	public void sendNotification(final OrderHistory orderHistory) {
+	public void sendNotification(final TradeHistory tradeHistory) {
 		try {
-			sendNotificationToSellOrder(orderHistory);
-			sendNotificationToBuyOrder(orderHistory);
+			sendNotificationToSellOrder(tradeHistory);
+			sendNotificationToBuyOrder(tradeHistory);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private MatchingNotificationDTO toMatchingNotificationDto(final Order order, final OrderHistory orderHistory) {
+	private MatchingNotificationDTO toMatchingNotificationDto(final Order order, final TradeHistory tradeHistory) {
 		return MatchingNotificationDTO.builder()
 			.orderId(order.getId())
 			.companyCode(order.getCompanyCode())
 			.type(order.getType())
-			.price(orderHistory.getPrice())
-			.quantity(orderHistory.getQuantity())
-			.createdAt(orderHistory.getCreatedDateTime())
+			.price(tradeHistory.getPrice())
+			.quantity(tradeHistory.getQuantity())
+			.createdAt(tradeHistory.getCreatedDateTime())
 			.build();
 	}
 
-	private void sendNotificationToSellOrder(final OrderHistory orderHistory) throws IOException {
-		Order sellOrder = orderRepository.findById(orderHistory.getSellOrderId()).orElseThrow();
+	private void sendNotificationToSellOrder(final TradeHistory tradeHistory) throws IOException {
+		Order sellOrder = orderRepository.findById(tradeHistory.getSellOrderId()).orElseThrow();
 		SseEmitter sellOrderEmitter = orderNotificationRepository.findByMemberId(
 			sellOrder.getAccount().getMember().getId());
-		sellOrderEmitter.send(toMatchingNotificationDto(sellOrder, orderHistory));
+		sellOrderEmitter.send(toMatchingNotificationDto(sellOrder, tradeHistory));
 	}
 
-	private void sendNotificationToBuyOrder(final OrderHistory orderHistory) throws IOException {
-		Order buyOrder = orderRepository.findById(orderHistory.getBuyOrderId()).orElseThrow();
+	private void sendNotificationToBuyOrder(final TradeHistory tradeHistory) throws IOException {
+		Order buyOrder = orderRepository.findById(tradeHistory.getBuyOrderId()).orElseThrow();
 		SseEmitter buyOrderEmitter = orderNotificationRepository.findByMemberId(
 			buyOrder.getAccount().getMember().getId());
-		buyOrderEmitter.send(toMatchingNotificationDto(buyOrder, orderHistory));
+		buyOrderEmitter.send(toMatchingNotificationDto(buyOrder, tradeHistory));
 	}
 }

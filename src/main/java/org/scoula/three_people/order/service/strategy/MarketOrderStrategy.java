@@ -1,9 +1,9 @@
 package org.scoula.three_people.order.service.strategy;
 
 import org.scoula.three_people.order.domain.Order;
-import org.scoula.three_people.order.domain.OrderHistory;
-import org.scoula.three_people.order.dto.OrderHistoryDTO;
-import org.scoula.three_people.order.repository.OrderHistoryRepositoryImpl;
+import org.scoula.three_people.order.domain.TradeHistory;
+import org.scoula.three_people.order.dto.TradeHistoryDTO;
+import org.scoula.three_people.order.repository.TradeHistoryRepositoryImpl;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
 import org.scoula.three_people.order.service.MatchingQueue;
 import org.springframework.context.ApplicationEventPublisher;
@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 class MarketOrderStrategy implements OrderStrategy {
 
 	private final OrderRepositoryImpl orderRepository;
-	private final OrderHistoryRepositoryImpl orderHistoryRepository;
+	private final TradeHistoryRepositoryImpl tradeHistoryRepository;
 	private final MatchingQueue matchingQueue;
 	private final ApplicationEventPublisher publisher;
 
@@ -81,8 +81,8 @@ class MarketOrderStrategy implements OrderStrategy {
 
 	// 거래 내역 저장
 	private void saveTradeHistory(Order marketOrder, Order sellOrder, int quantity) {
-		OrderHistory orderHistory = orderHistoryRepository.save(
-			OrderHistoryDTO.builder()
+		TradeHistory tradeHistory = tradeHistoryRepository.save(
+			TradeHistoryDTO.builder()
 				.sellOrderId(sellOrder.getId())
 				.buyOrderId(marketOrder.getId()) // 시장가 주문은 구매자가 됨
 				.quantity(quantity)
@@ -91,7 +91,7 @@ class MarketOrderStrategy implements OrderStrategy {
 				.toEntity()
 		);
         
-		publisher.publishEvent(orderHistory);
+		publisher.publishEvent(tradeHistory);
 	}
 
 	// 주문 접수 로그 기록
