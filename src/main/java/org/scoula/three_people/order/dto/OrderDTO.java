@@ -1,7 +1,7 @@
 package org.scoula.three_people.order.dto;
 
 import lombok.Builder;
-import org.scoula.three_people.order.controller.request.OrderRequest;
+import org.scoula.three_people.order.api.dto.request.OrderRequest;
 import org.scoula.three_people.order.domain.OrderStatus;
 import org.scoula.three_people.order.domain.Type;
 

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.scoula.three_people.member.domain.Account;
 import org.scoula.three_people.member.repository.AccountRepositoryImpl;
-import org.scoula.three_people.order.controller.request.OrderRequest;
+import org.scoula.three_people.order.api.dto.request.OrderRequest;
 import org.scoula.three_people.order.domain.Order;
 import org.scoula.three_people.order.domain.TradeHistory;
 import org.scoula.three_people.order.dto.OrderDTO;

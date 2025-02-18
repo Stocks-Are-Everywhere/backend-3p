@@ -1,4 +1,4 @@
-package org.scoula.three_people.order.controller;
+package org.scoula.three_people.order.api.controller;
 
 import org.scoula.three_people.order.service.TradeHistoryNotificationService;
 import org.springframework.http.ResponseEntity;
