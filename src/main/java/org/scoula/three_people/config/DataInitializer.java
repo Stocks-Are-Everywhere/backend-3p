@@ -1,6 +1,8 @@
 package org.scoula.three_people.config;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.scoula.three_people.member.domain.Account;
 import org.scoula.three_people.member.domain.Company;
@@ -58,30 +60,26 @@ public class DataInitializer implements ApplicationRunner {
 
 	private void loadDummyData() {
 		System.out.println("===== 더미 데이터 추가 시작 =====");
-
-		Member member1 = memberRepository.save(Member.builder()
-			.provider("GOOGLE")
-			.email("user1@example.com")
-			.nickname("User One")
-			.status(MemberStatus.ACTIVE)
-			.build());
-
-		Member member2 = memberRepository.save(Member.builder()
-			.provider("KAKAO")
-			.email("user2@example.com")
-			.nickname("User Two")
-			.status(MemberStatus.ACTIVE)
-			.build());
-
-		Account account1 = accountRepository.save(Account.builder()
-			.member(member1)
-			.balance(100000L)
-			.build());
-
-		Account account2 = accountRepository.save(Account.builder()
-			.member(member2)
-			.balance(200000L)
-			.build());
+		
+		System.out.println("---- 더미 member, account  데이터 10,000개 추가 시작 ----");
+		List<Member> members = new ArrayList<>();
+		List<Account> accounts = new ArrayList<>();
+		for (int i = 0; i < 10000; i++) {
+			Member member = Member.builder()
+				.provider("GOOGLE")
+				.email("user" + i + "@example.com")
+				.nickname("User " + i)
+				.status(MemberStatus.ACTIVE)
+				.build();
+			members.add(member);
+			accounts.add(Account.builder()
+				.member(member)
+				.balance(100000L)
+				.build());
+		}
+		memberRepository.saveAll(members);
+		accountRepository.saveAll(accounts);
+		System.out.println("---- 더미 member, account 데이터 10,000개 추가 완료 ----");
 
 		Company company1 = companyRepository.save(Company.builder()
 			.companyCode("COMP001")
@@ -100,7 +98,7 @@ public class DataInitializer implements ApplicationRunner {
 			.remainingQuantity(10)
 			.status(OrderStatus.ACTIVE)
 			.price(5000)
-			.account(account1)
+			.account(accounts.get(0))
 			.build());
 
 		Order order2 = orderRepository.save(Order.builder()
@@ -110,7 +108,7 @@ public class DataInitializer implements ApplicationRunner {
 			.remainingQuantity(5)
 			.status(OrderStatus.ACTIVE)
 			.price(10000)
-			.account(account2)
+			.account(accounts.get(1))
 			.build());
 
 		tradeHistoryJpaRepository.save(TradeHistory.builder()
@@ -122,7 +120,7 @@ public class DataInitializer implements ApplicationRunner {
 			.build());
 
 		wishRepository.save(Wish.builder()
-			.member(member1)
+			.member(members.get(0))
 			.company(company1)
 			.context("I want to invest in this company.")
 			.build());
