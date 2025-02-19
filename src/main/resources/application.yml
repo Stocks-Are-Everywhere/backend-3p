@@ -35,3 +35,9 @@ spring:
   server:
     instance:
       id: ${SERVER_INSTANCE_ID}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
