@@ -25,7 +25,7 @@ public class OrderController {
 	@PostMapping
 	public ResponseEntity<Void> placeOrder(@RequestBody OrderRequest orderRequest) {
 		orderService.placeOrder(orderRequest);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok().build();
 	}
 
 	@DeleteMapping("/{orderId}")
