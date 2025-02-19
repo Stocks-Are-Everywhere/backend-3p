@@ -1,4 +1,4 @@
-package org.scoula.three_people.order.controller.response;
+package org.scoula.three_people.order.api.dto.response;
 
 
 public class OrderResponse {

@@ -1,4 +1,4 @@
-package org.scoula.three_people.order.controller.request;
+package org.scoula.three_people.order.api.dto.request;
 
 import lombok.Builder;
 import lombok.Getter;

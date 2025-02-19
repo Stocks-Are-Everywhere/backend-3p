@@ -8,12 +8,21 @@ import java.util.PriorityQueue;
 
 import org.scoula.three_people.order.domain.Order;
 import org.scoula.three_people.order.domain.TradeHistory;
+import org.scoula.three_people.order.websocket.dto.TradeExecutionMessage;
+import org.scoula.three_people.order.websocket.handler.TradeWebSocketHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PriceLevel {
-
 	private final PriorityQueue<Order> elements = new PriorityQueue<>(Comparator.comparing(Order::getCreatedDateTime));
+	private static TradeWebSocketHandler webSocketHandler;
+
+   @Autowired
+    public void setWebSocketHandler(TradeWebSocketHandler handler) {
+        PriceLevel.webSocketHandler = handler;
+    }
+
 
 	public List<TradeHistory> match(final Order order) {
 		List<TradeHistory> history = new ArrayList<>();
@@ -43,6 +52,14 @@ public class PriceLevel {
 	}
 
 	private TradeHistory createHistory(final Order order, final Order matchingOrder, int quantity) {
+		// TODO: ROcketMQ PR merge 후 event producer 패키지로 이동
+		TradeExecutionMessage message = TradeExecutionMessage.builder()
+			.price(order.getPrice())
+			.quantity(quantity)
+			.tradeDateTime(LocalDateTime.now())
+			.build();
+		webSocketHandler.broadcastTradeExecution(message);
+
 		if (order.isBuyType()) {
 			return TradeHistory.builder()
 				.sellOrderId(matchingOrder.getId())
