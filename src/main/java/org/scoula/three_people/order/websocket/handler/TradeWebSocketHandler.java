@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.scoula.three_people.order.websocket.dto.OrderEventMessage;
 import org.scoula.three_people.order.websocket.dto.TradeExecutionMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,7 +61,20 @@ public class TradeWebSocketHandler extends TextWebSocketHandler {
         });
     }
 
-    private String convertToJson(TradeExecutionMessage message) {
+    public void broadcastOrderEvent(OrderEventMessage message) {
+        String payload = convertToJson(message);
+        sessions.forEach(session -> {
+            try {
+                if (session.isOpen()) {
+                    session.sendMessage(new TextMessage(payload));
+                }
+            } catch (IOException e) {
+                log.error("Error sending OrderEventMessage to WebSocket session {}", session.getId(), e);
+            }
+        });
+    }
+
+    private String convertToJson(Object message) {
         try {
             return objectMapper.writeValueAsString(message);
         } catch (JsonProcessingException e) {

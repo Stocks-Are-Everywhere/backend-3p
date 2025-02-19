@@ -10,6 +10,8 @@ import org.scoula.three_people.order.domain.TradeHistory;
 import org.scoula.three_people.order.dto.OrderDTO;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
 import org.scoula.three_people.order.repository.TradeHistoryRepositoryImpl;
+import org.scoula.three_people.order.websocket.dto.OrderEventMessage;
+import org.scoula.three_people.order.websocket.handler.TradeWebSocketHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ public class OrderService {
 	private final TradeHistoryRepositoryImpl tradeHistoryRepository;
 	private final AccountRepositoryImpl accountRepository;
 	private final OrderProcessor orderProcessor;
+	private final TradeWebSocketHandler tradeWebSocketHandler;
 
 	@Transactional
 	public void placeOrder(OrderRequest orderRequest) {
@@ -33,6 +36,18 @@ public class OrderService {
 
 		Order order = convertToEntity(orderDTO, account);
 		orderRepository.save(order);
+
+		OrderEventMessage orderEventMessage = OrderEventMessage.builder()
+				.orderId(order.getId())
+				.companyCode(order.getCompanyCode())
+				.type(order.getType().name())
+				.price(order.getPrice() != null ? order.getPrice() : 0)
+				.quantity(order.getTotalQuantity())
+				.userId(account.getId())
+				.status(order.getStatus().name())
+				.build();
+
+		saveOrderEvent(orderEventMessage);
 
 		process(order);
 	}
@@ -50,6 +65,10 @@ public class OrderService {
 		orderRepository.delete(order);
 
 		return "Order has been deleted: " + order.toString();
+	}
+
+	public void saveOrderEvent(OrderEventMessage orderEventMessage) {
+		tradeWebSocketHandler.broadcastOrderEvent(orderEventMessage);
 	}
 
 	private Order convertToEntity(OrderDTO dto, Account account) {
