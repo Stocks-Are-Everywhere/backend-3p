@@ -1,11 +1,11 @@
 package org.scoula.three_people.order.service;
 
 import java.math.BigDecimal;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 import org.scoula.three_people.order.domain.Order;
@@ -16,42 +16,59 @@ import org.springframework.stereotype.Service;
 @Service
 public class OrderBookService {
 
-    private final Map<BigDecimal, Queue<Order>> sellOrders = new ConcurrentHashMap<>();
-    private final Map<BigDecimal, Queue<Order>> buyOrders = new ConcurrentHashMap<>();
+    private static final int MAX_CAPACITY = 10; // 최대 주문 수
+
+    // 주문 생성 순서를 유지하는 Deque 사용 (동시성 고려)
+    private final Deque<Order> sellOrders = new ConcurrentLinkedDeque<>();
+    private final Deque<Order> buyOrders = new ConcurrentLinkedDeque<>();
 
     public void addOrder(Order order) {
         if ("SELL".equalsIgnoreCase(order.getType().name())) {
-            sellOrders.computeIfAbsent(new BigDecimal(order.getPrice()), k -> new ConcurrentLinkedQueue<>()).add(order);
+            if (sellOrders.size() >= MAX_CAPACITY) {
+                sellOrders.pollFirst(); // 가장 오래된 주문 삭제
+            }
+            sellOrders.offerLast(order); // 새로운 주문 추가
         } else if ("BUY".equalsIgnoreCase(order.getType().name())) {
-            buyOrders.computeIfAbsent(new BigDecimal(order.getPrice()), k -> new ConcurrentLinkedQueue<>()).add(order);
+            if (buyOrders.size() >= MAX_CAPACITY) {
+                buyOrders.pollFirst(); // 가장 오래된 주문 삭제
+            }
+            buyOrders.offerLast(order);
         }
     }
 
     public OrderBookResponse getBook(String companyCode) {
-        List<PriceLevelDto> askLevels = sellOrders.entrySet().stream()
-                .sorted(Map.Entry.<BigDecimal, Queue<Order>>comparingByKey().reversed())
+        // 매도 주문: 가격별로 그룹화 후 낮은 가격부터 정렬 (오름차순)
+        Map<BigDecimal, List<Order>> groupedSellOrders = sellOrders.stream()
+                .collect(Collectors.groupingBy(order -> new BigDecimal(order.getPrice())));
+
+        List<PriceLevelDto> sellLevels = groupedSellOrders.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey()) // 낮은 가격 순 정렬
                 .limit(5)
                 .map(entry -> PriceLevelDto.builder()
                         .price(entry.getKey())
-                        .totalQuantity(calculateTotalQuantity(entry.getValue()))
+                        .totalQuantity(entry.getValue().stream().mapToInt(Order::getTotalQuantity).sum())
                         .orderCount(entry.getValue().size())
                         .build())
                 .collect(Collectors.toList());
 
-        List<PriceLevelDto> bidLevels = buyOrders.entrySet().stream()
-                .sorted(Map.Entry.<BigDecimal, Queue<Order>>comparingByKey().reversed())
+        // 매수 주문: 가격별로 그룹화 후 높은 가격부터 정렬 (내림차순)
+        Map<BigDecimal, List<Order>> groupedBuyOrders = buyOrders.stream()
+                .collect(Collectors.groupingBy(order -> new BigDecimal(order.getPrice())));
+
+        List<PriceLevelDto> buyLevels = groupedBuyOrders.entrySet().stream()
+                .sorted((e1, e2) -> e2.getKey().compareTo(e1.getKey()))
                 .limit(5)
                 .map(entry -> PriceLevelDto.builder()
                         .price(entry.getKey())
-                        .totalQuantity(calculateTotalQuantity(entry.getValue()))
+                        .totalQuantity(entry.getValue().stream().mapToInt(Order::getTotalQuantity).sum())
                         .orderCount(entry.getValue().size())
                         .build())
                 .collect(Collectors.toList());
 
         return OrderBookResponse.builder()
                 .companyCode(companyCode)
-                .sellLevels(askLevels)
-                .buyLevels(bidLevels)
+                .sellLevels(sellLevels)
+                .buyLevels(buyLevels)
                 .build();
     }
 
