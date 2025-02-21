@@ -10,7 +10,6 @@ import org.scoula.three_people.order.domain.TradeHistory;
 import org.scoula.three_people.order.dto.OrderDTO;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
 import org.scoula.three_people.order.repository.TradeHistoryRepositoryImpl;
-import org.scoula.three_people.order.websocket.dto.OrderEventMessage;
 import org.scoula.three_people.order.websocket.dto.OrderBookResponse;
 import org.scoula.three_people.order.websocket.handler.TradeWebSocketHandler;
 import org.springframework.stereotype.Service;
@@ -27,8 +26,9 @@ public class OrderService {
 	private final AccountRepositoryImpl accountRepository;
 	private final OrderProcessor orderProcessor;
 	private final TradeWebSocketHandler tradeWebSocketHandler;
-	private final OrderBookService orderBookService; // 주입받아 사용
+	private final OrderBookService orderBookService;
 
+	// 실제 주문: 체결(process) 로직 수행
 	@Transactional
 	public void placeOrder(OrderRequest orderRequest) {
 		OrderDTO orderDTO = OrderDTO.fromRequest(orderRequest);
@@ -44,7 +44,28 @@ public class OrderService {
 		OrderBookResponse orderBookResponse = orderBookService.getBook(order.getCompanyCode());
 		tradeWebSocketHandler.broadcastOrderBook(orderBookResponse);
 
+		// 실제 주문은 체결 로직 실행
 		process(order);
+	}
+
+	// 시뮬레이션 주문: 체결(process) 로직 생략, 하지만 주문 Book 추가 및 소켓 브로드캐스트는 동일하게 수행
+	@Transactional
+	public void placeSimulatedOrder(OrderRequest orderRequest) {
+		OrderDTO orderDTO = OrderDTO.fromRequest(orderRequest);
+
+		Account account = accountRepository.findByMemberId(orderRequest.userId())
+				.orElseThrow(() -> new IllegalArgumentException("Account not found for userId: " + orderRequest.userId()));
+
+		Order order = convertToEntity(orderDTO, account);
+		orderRepository.save(order);
+
+		orderBookService.addOrder(order);
+
+		OrderBookResponse orderBookResponse = orderBookService.getBook(order.getCompanyCode());
+		tradeWebSocketHandler.broadcastOrderBook(orderBookResponse);
+
+		// 시뮬레이션 주문은 체결 로직(process)이 생략됨
+		System.out.println("Simulated order placed. Skipping trade processing.");
 	}
 
 	private void process(Order order) {
