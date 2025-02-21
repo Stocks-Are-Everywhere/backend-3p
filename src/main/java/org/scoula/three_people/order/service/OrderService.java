@@ -11,6 +11,7 @@ import org.scoula.three_people.order.dto.OrderDTO;
 import org.scoula.three_people.order.repository.OrderRepositoryImpl;
 import org.scoula.three_people.order.repository.TradeHistoryRepositoryImpl;
 import org.scoula.three_people.order.websocket.dto.OrderEventMessage;
+import org.scoula.three_people.order.websocket.dto.OrderBookResponse;
 import org.scoula.three_people.order.websocket.handler.TradeWebSocketHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,28 +27,22 @@ public class OrderService {
 	private final AccountRepositoryImpl accountRepository;
 	private final OrderProcessor orderProcessor;
 	private final TradeWebSocketHandler tradeWebSocketHandler;
+	private final OrderBookService orderBookService; // 주입받아 사용
 
 	@Transactional
 	public void placeOrder(OrderRequest orderRequest) {
 		OrderDTO orderDTO = OrderDTO.fromRequest(orderRequest);
 
 		Account account = accountRepository.findByMemberId(orderRequest.userId())
-			.orElseThrow(() -> new IllegalArgumentException("Account not found for userId: " + orderRequest.userId()));
+				.orElseThrow(() -> new IllegalArgumentException("Account not found for userId: " + orderRequest.userId()));
 
 		Order order = convertToEntity(orderDTO, account);
 		orderRepository.save(order);
 
-		OrderEventMessage orderEventMessage = OrderEventMessage.builder()
-				.orderId(order.getId())
-				.companyCode(order.getCompanyCode())
-				.type(order.getType().name())
-				.price(order.getPrice() != null ? order.getPrice() : 0)
-				.quantity(order.getTotalQuantity())
-				.userId(account.getId())
-				.status(order.getStatus().name())
-				.build();
+		orderBookService.addOrder(order);
 
-		saveOrderEvent(orderEventMessage);
+		OrderBookResponse orderBookResponse = orderBookService.getBook(order.getCompanyCode());
+		tradeWebSocketHandler.broadcastOrderBook(orderBookResponse);
 
 		process(order);
 	}
@@ -60,26 +55,22 @@ public class OrderService {
 	@Transactional
 	public String deleteOrder(Long orderId) {
 		Order order = orderRepository.findById(orderId)
-			.orElseThrow(() -> new IllegalArgumentException("Order not found for orderId: " + orderId));
+				.orElseThrow(() -> new IllegalArgumentException("Order not found for orderId: " + orderId));
 
 		orderRepository.delete(order);
 
 		return "Order has been deleted: " + order.toString();
 	}
 
-	public void saveOrderEvent(OrderEventMessage orderEventMessage) {
-		tradeWebSocketHandler.broadcastOrderEvent(orderEventMessage);
-	}
-
 	private Order convertToEntity(OrderDTO dto, Account account) {
 		return Order.builder()
-			.companyCode(dto.companyCode())
-			.type(dto.type())
-			.totalQuantity(dto.totalQuantity())
-			.remainingQuantity(dto.remainingQuantity())
-			.status(dto.status())
-			.price(dto.price())
-			.account(account)
-			.build();
+				.companyCode(dto.companyCode())
+				.type(dto.type())
+				.totalQuantity(dto.totalQuantity())
+				.remainingQuantity(dto.remainingQuantity())
+				.status(dto.status())
+				.price(dto.price())
+				.account(account)
+				.build();
 	}
 }

@@ -28,16 +28,17 @@ public class SingleOrderSimulator {
 	private static final Integer SECONDS_BETWEEN_ORDERS = 1;
 	private static final Integer ORDER_INTERVAL = SECONDS_BETWEEN_ORDERS * 1000; // n초로 변환
 	private static final List<String> COMPANY_CODES = Arrays.asList(
-			"COMP001",
-			"COMP002",
-			"COMP003",
-			"COMP004",
-			"COMP005",
-			"COMP006",
-			"COMP007",
-			"COMP008",
-			"COMP009",
-			"COMP010"
+//			"COMP001",
+//			"COMP002",
+//			"COMP003",
+//			"COMP004",
+//			"COMP005",
+//			"COMP006",
+//			"COMP007",
+//			"COMP008",
+//			"COMP009",
+//			"COMP010"
+			"삼성전자"
 	);
 
 

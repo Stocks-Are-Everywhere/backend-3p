@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.scoula.three_people.order.websocket.dto.OrderEventMessage;
+import org.scoula.three_people.order.websocket.dto.OrderBookResponse;
 import org.scoula.three_people.order.websocket.dto.TradeExecutionMessage;
+import org.scoula.three_people.order.websocket.dto.OrderEventMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -16,7 +17,6 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -34,9 +34,8 @@ public class TradeWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) {
         sessions.add(session);
         log.info("New WebSocket connection established: {}", session.getId());
-        try  {
-            session.sendMessage(
-                    new TextMessage("웹소켓 연결 성공"));
+        try {
+            session.sendMessage(new TextMessage("{\"message\": \"WebSocket connection successful\"}"));
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -57,6 +56,19 @@ public class TradeWebSocketHandler extends TextWebSocketHandler {
                 }
             } catch (IOException e) {
                 log.error("Error sending message to WebSocket session {}", session.getId(), e);
+            }
+        });
+    }
+
+    public void broadcastOrderBook(OrderBookResponse response) {
+        String payload = convertToJson(response);
+        sessions.forEach(session -> {
+            try {
+                if (session.isOpen()) {
+                    session.sendMessage(new TextMessage(payload));
+                }
+            } catch (IOException e) {
+                log.error("Error sending OrderBookResponse to WebSocket session {}", session.getId(), e);
             }
         });
     }
