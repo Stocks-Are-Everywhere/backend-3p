@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class OrderBookService {
 
-    private static final int MAX_CAPACITY = 10; // 최대 주문 수
+    private static final int MAX_CAPACITY = 20; // 최대 주문 수
 
     // 주문 생성 순서를 유지하는 Deque 사용 (동시성 고려)
     private final Deque<Order> sellOrders = new ConcurrentLinkedDeque<>();
@@ -43,7 +43,7 @@ public class OrderBookService {
 
         List<PriceLevelDto> sellLevels = groupedSellOrders.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey()) // 낮은 가격 순 정렬
-                .limit(5)
+                .limit(10)
                 .map(entry -> PriceLevelDto.builder()
                         .price(entry.getKey())
                         .totalQuantity(entry.getValue().stream().mapToInt(Order::getTotalQuantity).sum())
@@ -57,7 +57,7 @@ public class OrderBookService {
 
         List<PriceLevelDto> buyLevels = groupedBuyOrders.entrySet().stream()
                 .sorted((e1, e2) -> e2.getKey().compareTo(e1.getKey()))
-                .limit(5)
+                .limit(10)
                 .map(entry -> PriceLevelDto.builder()
                         .price(entry.getKey())
                         .totalQuantity(entry.getValue().stream().mapToInt(Order::getTotalQuantity).sum())
