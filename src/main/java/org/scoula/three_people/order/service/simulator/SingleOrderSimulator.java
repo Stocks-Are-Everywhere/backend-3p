@@ -10,7 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.scoula.three_people.member.domain.Member;
-import org.scoula.three_people.order.controller.request.OrderRequest;
+import org.scoula.three_people.order.api.dto.request.OrderRequest;
 import org.scoula.three_people.order.domain.Type;
 import org.scoula.three_people.order.service.OrderService;
 
@@ -27,18 +27,19 @@ public class SingleOrderSimulator {
 	private static final Integer PRICE_RANGE = 1000; // 기준가 +-1000원
 	private static final Integer SECONDS_BETWEEN_ORDERS = 1;
 	private static final Integer ORDER_INTERVAL = SECONDS_BETWEEN_ORDERS * 1000; // n초로 변환
-    private static final List<String> COMPANY_CODES = Arrays.asList(
-        "COMP001", 
-        "COMP002", 
-        "COMP003", 
-        "COMP004", 
-        "COMP005", 
-        "COMP006", 
-        "COMP007", 
-        "COMP008", 
-        "COMP009", 
-        "COMP010"
-    );
+	private static final List<String> COMPANY_CODES = Arrays.asList(
+//			"COMP001",
+//			"COMP002",
+//			"COMP003",
+//			"COMP004",
+//			"COMP005",
+//			"COMP006",
+//			"COMP007",
+//			"COMP008",
+//			"COMP009",
+//			"COMP010"
+			"삼성전자"
+	);
 
 
 	public SingleOrderSimulator(final OrderService orderService) {
