@@ -20,24 +20,26 @@ spring:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
 
-  ki:
-    appKey: ${KOREAINVEST_CLIENT_ID}
-    appSecret: ${KOREAINVEST_CLIENT_SECRET}
-    accountNo: ""
-
   messaging:
     rocketmq:
       name-server: ${ROCKETMQ_NAME_SERVER}
       producer:
         group: ${ROCKETMQ_PRODUCER_GROUP}
         send-message-timeout: ${ROCKETMQ_SEND_MESSAGE_TIMEOUT}
-
   server:
     instance:
       id: ${SERVER_INSTANCE_ID}
+
 
 management:
   endpoints:
     web:
       exposure:
         include: prometheus
+
+
+kis:
+  appKey: ${KIS_APP_KEY}
+  appSecret: ${KIS_SECRET_KEY}
+  approval: ${KIS_APPROVAL_KEY}
+  token: ${KIS_TOKEN}
